@@ -1,28 +1,7 @@
 """
-Trộn Đề Word Online - AIOMT Premium (Dashboard Layout)
+Trộn Đề Word Online - AIOMT Premium (Streamlit Cloud Version)
 Author: Phan Trường Duy - THPT Minh Đức
 """
-
-import os
-import sys
-import subprocess
-import time
-
-# ==================== TỰ ĐỘNG CÀI ĐẶT THƯ VIỆN ====================
-def install_libs():
-    required_packages = {
-        "pandas": "pandas",
-        "xlsxwriter": "XlsxWriter",
-        "openpyxl": "openpyxl",
-        "streamlit": "streamlit"
-    }
-    for lib, package_name in required_packages.items():
-        try:
-            __import__(lib)
-        except ImportError:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
-
-install_libs()
 
 # ==================== IMPORTS ====================
 import streamlit as st
@@ -32,6 +11,18 @@ import zipfile
 import io
 import pandas as pd
 from xml.dom import minidom
+import sys
+
+# ==================== CẤU HÌNH TRANG & CSS ====================
+
+st.set_page_config(
+    page_title="AIOMT Premium",
+    page_icon="⚡",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# ... (Phần code bên dưới giữ nguyên) ...
 
 # ==================== CẤU HÌNH TRANG & CSS ====================
 
