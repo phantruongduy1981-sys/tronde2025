@@ -696,9 +696,8 @@ def main():
     # Footer
     st.markdown("""
     <div class="footer">
-        <p>© 2024 <strong>Nguyễn Hữu Phúc</strong> - <a href="https://aiomtpremium.com" target="_blank">AIOMT Premium</a></p>
+        <p>© 2025 <strong> Phan Trường Duy - Trường THPT Minh Đức </strong> 
         <p>
-            <a href="https://facebook.com/nhphuclk" target="_blank">Facebook</a> • 
             <a href="https://zalo.me/0985692879" target="_blank">Zalo: 0985692879</a>
         </p>
     </div>
