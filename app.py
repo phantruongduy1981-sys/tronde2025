@@ -1,5 +1,5 @@
 """
-Trộn Đề Word Online - AIOMT Premium (Fixed HTML & Vertical Layout)
+Trộn Đề Word Online - AIOMT Premium (Final Fix HTML & Layout)
 Author: Phan Trường Duy - THPT Minh Đức
 """
 
@@ -105,21 +105,22 @@ st.markdown("""
     }
 
     /* 4. CUSTOM RADIO BUTTONS (DẠNG THẺ DỌC) */
-    /* Buộc các thẻ radio xếp dọc */
     div[role="radiogroup"] {
         display: flex;
         flex-direction: column; 
-        gap: 10px;
+        gap: 12px;
     }
     div[role="radiogroup"] > label {
+        width: 100%;
         background-color: white;
         border: 1px solid #cfd8dc;
         border-radius: 8px;
         padding: 15px;
+        display: flex;
+        align-items: center;
         transition: all 0.2s;
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        margin-bottom: 0px !important; /* Fix khoảng cách thừa */
-        width: 100%;
+        margin-bottom: 0px !important;
     }
     div[role="radiogroup"] > label:hover {
         border-color: #009688;
@@ -437,7 +438,7 @@ def process_document_final(file_bytes, num_versions, filename_prefix, auto_fix_i
 # ==================== MAIN UI ====================
 
 def main():
-    # HEADER
+    # 1. HEADER
     st.markdown("""
     <div class="main-header">
         <h1>TRƯỜNG THPT MINH ĐỨC</h1>
@@ -449,43 +450,43 @@ def main():
 
     # --- CỘT TRÁI ---
     with col_left:
-     # 1.1 HƯỚNG DẪN & CẤU TRÚC (Đã sửa lỗi hiển thị HTML)
+        # 1.1 HƯỚNG DẪN & CẤU TRÚC (ĐÃ SỬA LỖI INDENTATION)
         with st.expander("📄 Hướng dẫn & Cấu trúc (Bấm để xem)", expanded=False):
             st.markdown("""
 <div style="text-align: right; margin-bottom: 10px;">
-    <a href="https://drive.google.com/file/d/1_2zhqxwoMQ-AINMfCqy6QbZyGU4Skg3n/view?usp=sharing" target="_blank" 
-       style="background-color:#009688; color:white; padding:5px 10px; border-radius:5px; text-decoration:none; font-weight:bold;">
-       📥 Tải File Mẫu
-    </a>
+<a href="https://drive.google.com/file/d/1_2zhqxwoMQ-AINMfCqy6QbZyGU4Skg3n/view?usp=sharing" target="_blank" 
+style="background-color:#009688; color:white; padding:5px 10px; border-radius:5px; text-decoration:none; font-weight:bold;">
+📥 Tải File Mẫu
+</a>
 </div>
 
 <div class="instruction-card">
-    <div>📌 <b>Cấu trúc file Word chuẩn:</b></div>
-    <div style="margin-top:5px;">
-        <span class="part-title">PHẦN 1:</span> Trắc nghiệm nhiều lựa chọn (A. B. C. D.) – Trộn cả câu hỏi + phương án
-    </div>
-    <div>
-        <span class="part-title">PHẦN 2:</span> Đúng/Sai (a) b) c) d)) – Trộn câu hỏi + trộn a,b,c (giữ d cố định)
-    </div>
-    <div>
-        <span class="part-title">PHẦN 3:</span> Trả lời ngắn – Chỉ trộn thứ tự câu hỏi
-    </div>
-    
-    <div class="warning-box">
-        <div style="font-weight:bold; color:#e65100; margin-bottom:5px;">⚠️ Lưu ý quan trọng:</div>
-        <ul style="margin-bottom: 0; padding-left: 20px;">
-            <li>Mỗi câu hỏi bắt đầu bằng <span class="code-tag">Câu 1.</span>, <span class="code-tag">Câu 2.</span> ...</li>
-            <li>Phương án trắc nghiệm: <span class="code-tag">A.</span> <span class="code-tag">B.</span> <span class="code-tag">C.</span> <span class="code-tag">D.</span></li>
-            <li>Phương án đúng/sai: <span class="code-tag">a)</span> <span class="code-tag">b)</span> <span class="code-tag">c)</span> <span class="code-tag">d)</span></li>
-            <li>Đáp án đúng có thể <span style="text-decoration:underline;">gạch chân</span> hoặc <span style="color:blue; font-weight:bold;">tô màu</span>.</li>
-            <li style="margin-top:5px; border-top:1px dashed #ccc; padding-top:5px;">
-                <b>Đáp án Phần 3 (Mới):</b> Ghi <span style="color:red; font-weight:bold;">ĐS: Kết quả</span> và tô đỏ.
-            </li>
-        </ul>
-    </div>
+<div>📌 <b>Cấu trúc file Word chuẩn:</b></div>
+<div style="margin-top:5px;">
+<span class="part-title">PHẦN 1:</span> Trắc nghiệm nhiều lựa chọn (A. B. C. D.) – Trộn cả câu hỏi + phương án
+</div>
+<div>
+<span class="part-title">PHẦN 2:</span> Đúng/Sai (a) b) c) d)) – Trộn câu hỏi + trộn a,b,c (giữ d cố định)
+</div>
+<div>
+<span class="part-title">PHẦN 3:</span> Trả lời ngắn – Chỉ trộn thứ tự câu hỏi
+</div>
+
+<div class="warning-box">
+<div style="font-weight:bold; color:#e65100; margin-bottom:5px;">⚠️ Lưu ý quan trọng:</div>
+<ul style="margin-bottom: 0; padding-left: 20px;">
+<li>Mỗi câu hỏi bắt đầu bằng <span class="code-tag">Câu 1.</span>, <span class="code-tag">Câu 2.</span> ...</li>
+<li>Phương án trắc nghiệm: <span class="code-tag">A.</span> <span class="code-tag">B.</span> <span class="code-tag">C.</span> <span class="code-tag">D.</span></li>
+<li>Phương án đúng/sai: <span class="code-tag">a)</span> <span class="code-tag">b)</span> <span class="code-tag">c)</span> <span class="code-tag">d)</span></li>
+<li>Đáp án đúng có thể <span style="text-decoration:underline;">gạch chân</span> hoặc <span style="color:blue; font-weight:bold;">tô màu</span>.</li>
+<li style="margin-top:5px; border-top:1px dashed #ccc; padding-top:5px;">
+<b>Đáp án Phần 3 (Mới):</b> Ghi <span style="color:red; font-weight:bold;">ĐS: Kết quả</span> và tô đỏ.
+</li>
+</ul>
+</div>
 </div>
 """, unsafe_allow_html=True)
-                   
+        
         # BƯỚC 1: UPLOAD & CHECK
         st.markdown('<div class="step-label"><div class="step-badge">1</div>Chọn file đề Word (*.docx)</div>', unsafe_allow_html=True)
         
@@ -527,19 +528,19 @@ def main():
 
     # --- CỘT PHẢI ---
     with col_right:
-        # BƯỚC 2: KIỂU TRỘN (DẠNG DỌC)
+        # BƯỚC 2: KIỂU TRỘN (XẾP DỌC)
         st.markdown('<div class="step-label"><div class="step-badge">2</div>Chọn kiểu trộn</div>', unsafe_allow_html=True)
         
         mode = st.radio(
             "Mode",
             ["auto", "mcq", "tf"],
             format_func=lambda x: {
-                "auto": "🔄 Tự động (Phần 1, 2, 3)",
+                "auto": "🔄 Tự động (Phát hiện 3 phần)",
                 "mcq": "📝 Trắc nghiệm (Toàn bộ A.B.C.D)",
                 "tf": "✅ Đúng/Sai (Toàn bộ a)b)c)d))"
             }[x],
             label_visibility="collapsed",
-            horizontal=False # Quan trọng: Xếp dọc
+            horizontal=False # Xếp dọc mỗi item 1 dòng
         )
         
         st.write("") # Spacer
