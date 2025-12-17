@@ -698,7 +698,7 @@ def main():
     <div class="footer">
         <p>© 2025 <strong> Phan Trường Duy - Trường THPT Minh Đức </strong> 
         <p>
-            <a href="https://zalo.me/0985692879" target="_blank">Zalo: 0985692879</a>
+            <a href="https://zalo.me/0389994070" target="_blank">Zalo: 0389994070</a>
         </p>
     </div>
     """, unsafe_allow_html=True)
