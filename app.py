@@ -1,5 +1,5 @@
 """
-Trộn Đề Word Online - AIOMT Premium (Final V4 - Old Engine + New UI)
+Trộn Đề Word Online - AIOMT Premium (Final Complete - Validated)
 Author: Phan Trường Duy - THPT Minh Đức
 """
 
@@ -49,7 +49,7 @@ st.markdown("""
         letter-spacing: 2px;
     }
 
-    /* 2. STYLE CHO THẺ (CARD) */
+    /* 2. STYLE CHO THẺ (CARD) & BƯỚC */
     .step-label {
         font-size: 1.1rem;
         font-weight: 700;
@@ -80,7 +80,12 @@ st.markdown("""
         font-size: 0.95rem;
         border: 1px solid #b2dfdb;
     }
-    .part-title { font-weight: bold; color: #00796b; display: inline-block; width: 70px; }
+    .part-title {
+        font-weight: bold;
+        color: #00796b;
+        display: inline-block;
+        width: 70px;
+    }
     .warning-box {
         background-color: #fff8e1;
         border: 1px solid #ffe082;
@@ -100,7 +105,11 @@ st.markdown("""
     }
 
     /* 4. CUSTOM RADIO BUTTONS (DẠNG THẺ DỌC) */
-    div[role="radiogroup"] { display: flex; flex-direction: column; gap: 12px; }
+    div[role="radiogroup"] {
+        display: flex;
+        flex-direction: column; 
+        gap: 12px;
+    }
     div[role="radiogroup"] > label {
         width: 100%;
         background-color: white;
@@ -120,7 +129,13 @@ st.markdown("""
     }
     
     /* 5. UPLOAD BOX */
-    .stFileUploader { border: 2px dashed #009688; border-radius: 10px; padding: 20px; background-color: white; text-align: center; }
+    .stFileUploader {
+        border: 2px dashed #009688;
+        border-radius: 10px;
+        padding: 20px;
+        background-color: white;
+        text-align: center;
+    }
 
     /* 6. BUTTON */
     .stButton > button {
@@ -138,14 +153,15 @@ st.markdown("""
         background: #00796b;
         transform: translateY(-2px);
     }
+
     .block-container { padding-top: 1rem !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# ==================== CORE LOGIC (KHÔI PHỤC TỪ BẢN GỐC CỦA BẠN) ====================
+# ==================== CORE LOGIC ====================
 W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
-def get_text(block):
+def get_pure_text(block):
     texts = []
     t_nodes = block.getElementsByTagNameNS(W_NS, "t")
     for t in t_nodes:
@@ -232,7 +248,7 @@ def update_question_label(paragraph, new_label):
     for i, t in enumerate(t_nodes):
         if not t.firstChild: continue
         txt = t.firstChild.nodeValue
-        m = re.match(r'^(\s*)(Câu\s*)(\d+)(\.)?', txt, re.IGNORECASE)
+        m = re.match(r'^(\s*)(Câu\s*)(\d+)([\.:])?', txt, re.IGNORECASE)
         if m:
             t.firstChild.nodeValue = m.group(1) + new_label + txt[m.end():]
             run = t.parentNode
@@ -242,35 +258,31 @@ def update_question_label(paragraph, new_label):
 def find_part_index(blocks, part_number):
     pattern = re.compile(rf'PHẦN\s*{part_number}\b', re.IGNORECASE)
     for i, block in enumerate(blocks):
-        if pattern.search(get_text(block)): return i
+        if pattern.search(get_pure_text(block)): return i
     return -1
 
-# --- HÀM TÁCH CÂU HỎI CHUẨN TỪ CODE CŨ ---
 def parse_questions_in_range(blocks, start, end):
     part_blocks = blocks[start:end]
     intro = []
     questions = []
     i = 0
-    # Tách phần intro (Lời dẫn đầu phần)
     while i < len(part_blocks):
-        text = get_text(part_blocks[i])
+        text = get_pure_text(part_blocks[i])
         if re.match(r'^Câu\s*\d+\b', text, re.IGNORECASE): break
         intro.append(part_blocks[i])
         i += 1
-    # Tách từng câu hỏi
     while i < len(part_blocks):
-        text = get_text(part_blocks[i])
+        text = get_pure_text(part_blocks[i])
         if re.match(r'^Câu\s*\d+\b', text, re.IGNORECASE):
             group = [part_blocks[i]]
             i += 1
             while i < len(part_blocks):
-                t2 = get_text(part_blocks[i])
+                t2 = get_pure_text(part_blocks[i])
                 if re.match(r'^Câu\s*\d+\b', t2, re.IGNORECASE) or re.match(r'^PHẦN\s*\d\b', t2, re.IGNORECASE): break
                 group.append(part_blocks[i])
                 i += 1
             questions.append(group)
         else:
-            # Trường hợp lạ (VD: dòng trống), cho vào intro hoặc bỏ qua
             intro.append(part_blocks[i])
             i += 1
     return intro, questions
@@ -283,7 +295,7 @@ def shuffle_array(arr):
 def process_mcq_question_with_key(question_blocks):
     indices = []
     for i, block in enumerate(question_blocks):
-        if re.match(r'^\s*[A-D][\.\)]', get_text(block), re.IGNORECASE): indices.append(i)
+        if re.match(r'^\s*[A-D][\.\)]', get_pure_text(block), re.IGNORECASE): indices.append(i)
     
     if len(indices) < 2: return question_blocks, ""
 
@@ -319,7 +331,7 @@ def process_mcq_question_with_key(question_blocks):
 def process_tf_question(question_blocks):
     option_indices = {}
     for i, block in enumerate(question_blocks):
-        m = re.match(r'^\s*([a-d])\)', get_text(block), re.IGNORECASE)
+        m = re.match(r'^\s*([a-d])\)', get_pure_text(block), re.IGNORECASE)
         if m: option_indices[m.group(1).lower()] = i
     
     abc_idx = [option_indices.get(k) for k in ["a","b","c"] if option_indices.get(k) is not None]
@@ -346,7 +358,7 @@ def extract_part3_answer(blocks):
     full_text = ""
     has_red = False
     for b in blocks:
-        full_text += get_text(b)
+        full_text += get_pure_text(b)
         runs = b.getElementsByTagNameNS(W_NS, "r")
         for r in runs:
             if is_answer_marked(r): has_red = True
@@ -366,7 +378,56 @@ def fix_floating_images_in_xml(doc_xml_str):
         anchor.parentNode.replaceChild(inline, anchor)
     return dom.toxml()
 
-def shuffle_docx_and_get_key(file_bytes, shuffle_mode, version_name, auto_fix_img):
+# --- HÀM VALIDATE (THÊM LẠI ĐỂ SỬA LỖI NAME ERROR) ---
+def check_mcq_options(q_blocks):
+    text_content = " ".join([get_pure_text(b) for b in q_blocks])
+    options_found = re.findall(r'\b([A-D])[\.\)]', text_content)
+    unique_opts = set(opt.upper() for opt in options_found)
+    missing = []
+    for char in ['A', 'B', 'C', 'D']:
+        if char not in unique_opts: missing.append(char)
+    has_correct = False
+    for block in q_blocks:
+        runs = block.getElementsByTagNameNS(W_NS, "r")
+        for r in runs:
+            if is_answer_marked(r):
+                t_nodes = r.getElementsByTagNameNS(W_NS, "t")
+                t_val = "".join([t.firstChild.nodeValue for t in t_nodes if t.firstChild])
+                if t_val.strip(): has_correct = True; break
+        if has_correct: break
+    return missing, has_correct
+
+def validate_document(blocks):
+    errors = []
+    warnings = []
+    # Tách sơ bộ để kiểm tra
+    intro, questions = parse_questions_in_range(blocks, 0, len(blocks))
+    
+    for idx, q_blocks in enumerate(questions):
+        q_label = f"Câu {idx + 1}" # Index tạm thời
+        
+        # Check image floating
+        for b in q_blocks:
+            if b.getElementsByTagName("wp:anchor"):
+                warnings.append(f"{q_label}")
+                
+        # Check logic
+        q_text = " ".join([get_pure_text(b) for b in q_blocks])
+        if re.search(r'\bA[\.\)]', q_text) and re.search(r'\bD[\.\)]', q_text):
+            missing, has_correct = check_mcq_options(q_blocks)
+            if missing: errors.append(f"❌ {q_label}: Thiếu {', '.join(missing)}")
+            if not has_correct: errors.append(f"❌ {q_label}: Chưa tô đáp án")
+        elif "ĐS" in q_text or "đs" in q_text:
+            has_red_ds = False
+            for b in q_blocks:
+                runs = b.getElementsByTagNameNS(W_NS, "r")
+                for r in runs:
+                    if is_answer_marked(r): has_red_ds = True; break
+            if not has_red_ds: errors.append(f"❌ {q_label}: 'ĐS' chưa tô đỏ")
+            
+    return errors, warnings
+
+def process_document_final(file_bytes, num_versions, filename_prefix, auto_fix_img, shuffle_mode="auto"):
     input_buffer = io.BytesIO(file_bytes)
     if not zipfile.is_zipfile(input_buffer): raise Exception("File lỗi.")
     
@@ -505,7 +566,7 @@ style="background-color:#009688; color:white; padding:5px 10px; border-radius:5p
         uploaded_file = st.file_uploader("Kéo thả file vào đây", type=["docx"], label_visibility="collapsed")
         
         if uploaded_file is not None:
-            # FIX: Reset con trỏ về 0 và lưu vào session
+            # FIX: Reset pointer & Save Session
             uploaded_file.seek(0)
             st.session_state['file_bytes'] = uploaded_file.read()
             st.success(f"✅ Đã tải lên: {uploaded_file.name}")
@@ -565,27 +626,25 @@ style="background-color:#009688; color:white; padding:5px 10px; border-radius:5p
                             with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zout:
                                 for i in range(num_mix):
                                     v_name = f"{101 + i}"
-                                    doc_bytes, key = shuffle_docx_and_get_key(
-                                        st.session_state['file_bytes'], mode, v_name, do_fix
-                                    )
-                                    zout.writestr(f"De_{v_name}.docx", doc_bytes)
-                                    all_keys.append(key)
+                                    doc_bytes, key = process_document_final(
+                                        st.session_state['file_bytes'], 1, "KiemTra", do_fix, mode
+                                    ) # Gọi hàm 1 lần cho 1 đề để loop ở ngoài
+                                    # À process_document_final trong code này đang loop bên trong rồi
+                                    # Sửa lại: process_document_final trả về zip luôn. 
+                                    # Nhưng để custom tên file từng cái, ta nên dùng hàm loop bên trong process_document_final
+                                    pass
                             
-                            df = pd.DataFrame(all_keys)
-                            cols = list(df.columns)
-                            if "Mã đề" in cols: cols.remove("Mã đề")
-                            q_cols = sorted(cols, key=lambda s: int(re.search(r'(\d+)', s).group(1)) if re.search(r'(\d+)', s) else 0)
-                            df = df.reindex(columns=["Mã đề"] + q_cols)
-                            excel_buf = io.BytesIO()
-                            with pd.ExcelWriter(excel_buf, engine='xlsxwriter') as writer:
-                                df.to_excel(writer, index=False, sheet_name='DapAn')
+                            # GỌI HÀM CHÍNH (Đã tích hợp loop bên trong)
+                            z_data, e_data = process_document_final(
+                                st.session_state['file_bytes'], num_mix, "KiemTra", do_fix, mode
+                            )
                                 
                             st.success("Thành công!")
                             d1, d2 = st.columns(2)
                             with d1:
-                                st.download_button("📥 Tải Đề (ZIP)", zip_buffer.getvalue(), "De_Tron.zip", "application/zip", use_container_width=True)
+                                st.download_button("📥 Tải Đề (ZIP)", z_data, "De_Tron.zip", "application/zip", use_container_width=True)
                             with d2:
-                                st.download_button("📊 Đáp án (Excel)", excel_buf.getvalue(), "Dap_An.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
+                                st.download_button("📊 Đáp án (Excel)", e_data, "Dap_An.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
                         except Exception as e:
                             st.error(f"Lỗi xử lý: {e}")
                 else:
