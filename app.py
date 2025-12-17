@@ -51,15 +51,37 @@ st.markdown(f"""
         padding: 15px;
         margin-bottom: 15px;
         font-size: 14px;
+        line-height: 1.6;
     }}
+    .info-title {{
+        color: {PRIMARY_COLOR};
+        font-weight: bold;
+        font-size: 16px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        border-bottom: 2px solid {PRIMARY_COLOR};
+        display: inline-block;
+    }}
+    .part-label {{
+        font-weight: bold;
+        color: #2e7d32;
+    }}
+    
+    /* Khung Cảnh báo/Quy ước */
     .warning-box {{
         background-color: {BG_YELLOW};
         border: 1px solid #fff59d;
         border-radius: 5px;
-        padding: 10px;
-        margin-top: 10px;
-        font-size: 13px;
+        padding: 15px;
+        margin-top: 15px;
+        font-size: 14px;
         color: #f57f17;
+    }}
+    .warning-title {{
+        font-weight: bold;
+        color: #ef6c00;
+        margin-bottom: 5px;
+        text-transform: uppercase;
     }}
     
     /* Upload Box */
@@ -454,20 +476,34 @@ def main():
     col_left, col_right = st.columns([1, 1], gap="large")
 
     with col_left:
-        with st.expander("📄 Hướng dẫn & Cấu trúc (Bấm để xem)", expanded=True):
+        with st.expander("📄 Hướng dẫn & File mẫu (Bấm để xem)", expanded=True):
             st.markdown(f"""
             <div class="info-box">
-                <div class="info-title">📌 Cấu trúc file Word chuẩn:</div>
-                <div><b>PHẦN 1:</b> Trắc nghiệm (A. B. C. D.)</div>
-                <div><b>PHẦN 2:</b> Đúng/Sai (a) b) c) d))</div>
-                <div><b>PHẦN 3:</b> Trả lời ngắn (Điền khuyết)</div>
+                <div class="info-title">📌 CẤU TRÚC FILE CHUẨN:</div>
+                <p>
+                    <span class="part-label">PHẦN 1:</span> Trắc nghiệm nhiều lựa chọn (A. B. C. D.)<br>
+                    <i>(Trộn cả câu hỏi và phương án)</i>
+                </p>
+                <p>
+                    <span class="part-label">PHẦN 2:</span> Trắc nghiệm Đúng/Sai (a) b) c) d))<br>
+                    <i>(Trộn câu hỏi, trộn ý a,b,c - giữ d cố định)</i>
+                </p>
+                <p>
+                    <span class="part-label">PHẦN 3:</span> Trắc nghiệm trả lời ngắn<br>
+                    <i>(Chỉ trộn thứ tự câu hỏi)</i>
+                </p>
                 
                 <div class="warning-box">
-                    <b>⚠️ Quy định ghi Đáp án (Tô đỏ hoặc Gạch chân):</b>
-                    <ul style="margin-bottom:0; padding-left:20px">
-                        <li>Phần 1, 2: Tô đỏ/Gạch chân vào đáp án đúng (A, B... hoặc a, b...)</li>
-                        <li>Phần 3: Ghi <b style="color:{TEXT_RED}">ĐS: Giá trị</b> ở cuối câu hỏi và <b>TÔ ĐỎ</b>.
-                        <br><i>Ví dụ: <span style="color:red">ĐS: -0,1</span></i> (App sẽ tự động lấy giá trị này vào Excel và xóa khỏi đề thi).</li>
+                    <div class="warning-title">⚠️ QUY ƯỚC ĐÁP ÁN (BẮT BUỘC):</div>
+                    <ul style="margin-bottom: 0; padding-left: 20px;">
+                        <li><b>Quy tắc chung:</b> Bắt đầu câu hỏi bằng <code>Câu 1.</code>, <code>Câu 2.</code>...</li>
+                        <li>
+                            <b>Phần 1 & 2:</b> Đáp án đúng phải <span style="color:red; font-weight:bold">TÔ ĐỎ</span> hoặc <u>GẠCH CHÂN</u>.
+                        </li>
+                        <li>
+                            <b>Phần 3:</b> Ghi <span style="color:red; font-weight:bold">ĐS: Giá trị</span> ở cuối câu và <span style="color:red; font-weight:bold">TÔ ĐỎ</span>.<br>
+                            <i>(Ví dụ: <span style="color:red">ĐS: -5</span> hoặc <span style="color:red">ĐS: 10.5</span>)</i>
+                        </li>
                     </ul>
                 </div>
             </div>
