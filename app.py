@@ -1,5 +1,5 @@
 """
-Trộn Đề Word Online - AIOMT Premium (Compact & Auto-Fix UI)
+Trộn Đề Word Online - AIOMT Premium (Design Match Fix)
 Author: Phan Trường Duy - THPT Minh Đức
 """
 
@@ -15,115 +15,150 @@ import sys
 # ==================== CẤU HÌNH TRANG ====================
 
 st.set_page_config(
-    page_title="Trộn Đề 2025",
+    page_title="App Trộn Đề 2025",
     page_icon="🏫",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# ==================== CSS TỐI ƯU KHÔNG GIAN ====================
+# ==================== CSS CUSTOM DESIGN ====================
 st.markdown("""
 <style>
-    /* 1. Header nhỏ gọn (70% so với bản cũ) */
+    /* 1. HEADER */
     .main-header {
         text-align: center;
-        padding: 1rem 0; /* Giảm padding */
-        background: linear-gradient(to right, #009688, #004d40);
+        padding: 2rem 0;
+        background: linear-gradient(to right, #009688, #00796b);
         color: white;
         border-radius: 0 0 15px 15px;
-        margin-bottom: 1rem; /* Giảm khoảng cách dưới */
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
     .main-header h1 {
         font-family: 'Arial', sans-serif;
-        font-weight: 800;
-        font-size: 2.2rem !important; /* Giảm size chữ */
+        font-weight: 900;
+        font-size: 2.8rem;
         text-transform: uppercase;
         margin: 0;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
     .main-header p {
-        font-size: 0.9rem;
-        margin-top: 5px;
+        font-size: 1.1rem;
+        margin-top: 10px;
         opacity: 0.9;
-        letter-spacing: 1px;
+        letter-spacing: 2px;
     }
 
-    /* 2. Thẻ Card Compact (Gần nhau hơn) */
-    .step-card {
-        background-color: white;
-        border-radius: 10px;
-        padding: 15px; /* Giảm padding trong thẻ */
-        margin-bottom: 10px; /* Giảm khoảng cách giữa các thẻ */
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        border: 1px solid #e0e0e0;
-    }
-    
-    .card-header {
+    /* 2. STYLE CHO THẺ (CARD) & BƯỚC */
+    .step-label {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #263238;
+        margin-bottom: 10px;
         display: flex;
         align-items: center;
-        margin-bottom: 10px;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 5px;
     }
-    .step-number {
-        background: #00796b;
+    .step-badge {
+        background-color: #009688;
         color: white;
-        width: 24px; /* Nhỏ lại */
-        height: 24px;
+        width: 28px;
+        height: 28px;
         border-radius: 50%;
         display: flex;
-        justify-content: center;
         align-items: center;
-        font-weight: bold;
+        justify-content: center;
+        margin-right: 10px;
         font-size: 0.9rem;
-        margin-right: 8px;
-    }
-    .step-title {
-        font-size: 1rem;
-        font-weight: 700;
-        color: #004d40;
     }
 
-    /* 3. Nút bấm & Input tối ưu */
+    /* 3. KHUNG HƯỚNG DẪN (Giống hình mẫu) */
+    .instruction-card {
+        background-color: #e0f2f1; /* Xanh nhạt nền */
+        border-radius: 10px;
+        padding: 20px;
+        color: #004d40;
+        font-size: 0.95rem;
+        border: 1px solid #b2dfdb;
+    }
+    .part-title {
+        font-weight: bold;
+        color: #00796b;
+        display: inline-block;
+        width: 70px;
+    }
+    .warning-box {
+        background-color: #fff8e1; /* Vàng nhạt */
+        border: 1px solid #ffe082;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+        color: #5d4037;
+    }
+    .code-tag {
+        background-color: #fff;
+        padding: 2px 6px;
+        border-radius: 4px;
+        border: 1px solid #e0e0e0;
+        font-family: monospace;
+        color: #d84315;
+        font-weight: bold;
+    }
+
+    /* 4. CUSTOM RADIO BUTTONS (Biến Radio thành Card ngang) */
+    div[role="radiogroup"] {
+        display: flex;
+        gap: 10px;
+        width: 100%;
+    }
+    div[role="radiogroup"] > label {
+        flex: 1;
+        background-color: white;
+        border: 1px solid #cfd8dc;
+        border-radius: 8px;
+        padding: 10px;
+        text-align: center;
+        transition: all 0.2s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    div[role="radiogroup"] > label:hover {
+        border-color: #009688;
+        background-color: #f0fdfa;
+    }
+    /* Highlight selected option (Streamlit adds data-checked attribute or similar, but simplified via CSS sibling is hard. 
+       We rely on Streamlit's default highlighting but style the container) */
+    
+    /* 5. UPLOAD BOX */
+    .stFileUploader {
+        border: 2px dashed #009688;
+        border-radius: 10px;
+        padding: 20px;
+        background-color: white;
+        text-align: center;
+    }
+
+    /* 6. BUTTON */
     .stButton > button {
         background: #009688;
         color: white;
-        width: 100%;
-        padding: 0.5rem;
-        border-radius: 6px;
+        border-radius: 8px;
+        padding: 12px;
         font-weight: bold;
         border: none;
+        width: 100%;
+        font-size: 1.1rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     .stButton > button:hover {
         background: #00796b;
-        color: white;
+        transform: translateY(-2px);
     }
-    
-    /* Upload gọn */
-    .stFileUploader {
-        padding: 5px; 
-    }
-    
-    /* Thu nhỏ khoảng cách chung của Streamlit */
-    .block-container {
-        padding-top: 1rem !important;
-        padding-bottom: 1rem !important;
-    }
-    
-    /* Box kiểm tra lỗi */
-    .validation-box {
-        background: #f1f8e9;
-        border: 1px solid #c5e1a5;
-        padding: 10px;
-        border-radius: 5px;
-        margin-top: 10px;
-        font-size: 0.9rem;
-    }
+
+    /* Thu gọn khoảng cách */
+    .block-container { padding-top: 1rem !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# ==================== LOGIC XỬ LÝ (CORE) ====================
+# ==================== CORE LOGIC (GIỮ NGUYÊN) ====================
 W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
 def get_pure_text(block):
@@ -200,18 +235,14 @@ def validate_document(blocks):
     
     for idx, q_blocks in enumerate(questions):
         q_label = f"Câu {q_num_map.get(idx, 'Unknown')}"
-        # Check hình ảnh
         for b in q_blocks:
             if b.getElementsByTagName("wp:anchor"):
                 warnings.append(f"{q_label}")
-
         q_text = " ".join([get_pure_text(b) for b in q_blocks])
-        # Check trắc nghiệm
         if re.search(r'\bA[\.\)]', q_text) and re.search(r'\bD[\.\)]', q_text):
             missing, has_correct = check_mcq_options(q_blocks)
             if missing: errors.append(f"❌ {q_label}: Thiếu {', '.join(missing)}")
             if not has_correct: errors.append(f"❌ {q_label}: Chưa tô đáp án")
-        # Check tự luận
         elif "ĐS" in q_text or "đs" in q_text:
             has_red_ds = False
             for b in q_blocks:
@@ -222,9 +253,7 @@ def validate_document(blocks):
             
     return errors, warnings
 
-# ... [Giữ nguyên các hàm update_question_label, process_document_final...] ...
-# (Để tiết kiệm không gian hiển thị code, tôi dùng lại logic cũ cho phần xử lý lõi)
-# ... Bạn hãy giữ nguyên các hàm xử lý XML từ phiên bản trước ...
+# ... [Các hàm xử lý XML lõi giữ nguyên] ...
 def update_question_label(paragraph, new_number):
     t_nodes = paragraph.getElementsByTagNameNS(W_NS, "t")
     for t in t_nodes:
@@ -410,7 +439,7 @@ def process_document_final(file_bytes, num_versions, filename_prefix, auto_fix_i
 # ==================== MAIN UI ====================
 
 def main():
-    # 1. HEADER (70% size)
+    # 1. HEADER
     st.markdown("""
     <div class="main-header">
         <h1>TRƯỜNG THPT MINH ĐỨC</h1>
@@ -418,31 +447,55 @@ def main():
     </div>
     """, unsafe_allow_html=True)
 
-    # LAYOUT 2 CỘT: Cột Trái (Upload + Check) | Cột Phải (Cấu hình)
-    # Gap="small" để tối ưu không gian
-    col_left, col_right = st.columns([1, 1], gap="small")
+    col_left, col_right = st.columns([1, 1], gap="medium")
 
     # --- CỘT TRÁI ---
     with col_left:
-        # THẺ HƯỚNG DẪN THU GỌN (50% size, Collapsible)
-        with st.expander("ℹ️ Tải mẫu & Hướng dẫn (Bấm để xem)", expanded=False):
-            c_d1, c_d2 = st.columns([1, 1])
-            with c_d1:
-                st.info("Quy định: Câu 1, Đáp án tô đỏ/gạch chân.")
-            with c_d2:
-                st.link_button("📥 Tải File Mẫu", "https://drive.google.com/file/d/1_2zhqxwoMQ-AINMfCqy6QbZyGU4Skg3n/view?usp=sharing")
-
-        # THẺ BƯỚC 1: UPLOAD & KIỂM TRA
-        st.markdown('<div class="step-card">', unsafe_allow_html=True)
-        st.markdown('<div class="card-header"><div class="step-number">1</div><div class="step-title">Upload & Kiểm tra</div></div>', unsafe_allow_html=True)
+        # 1.1 HƯỚNG DẪN & CẤU TRÚC (THU GỌN)
+        with st.expander("📄 Hướng dẫn & Cấu trúc (Bấm để xem)", expanded=False):
+            st.markdown("""
+            <div style="text-align: right; margin-bottom: 10px;">
+                <a href="https://drive.google.com/file/d/1_2zhqxwoMQ-AINMfCqy6QbZyGU4Skg3n/view?usp=sharing" target="_blank" 
+                   style="background-color:#009688; color:white; padding:5px 10px; border-radius:5px; text-decoration:none; font-weight:bold;">
+                   📥 Tải File Mẫu
+                </a>
+            </div>
+            
+            <div class="instruction-card">
+                <div>📌 <b>Cấu trúc file Word chuẩn:</b></div>
+                <div style="margin-top:5px;">
+                    <span class="part-title">PHẦN 1:</span> Trắc nghiệm nhiều lựa chọn (A. B. C. D.) – Trộn cả câu hỏi + phương án
+                </div>
+                <div>
+                    <span class="part-title">PHẦN 2:</span> Đúng/Sai (a) b) c) d)) – Trộn câu hỏi + trộn a,b,c (giữ d cố định)
+                </div>
+                <div>
+                    <span class="part-title">PHẦN 3:</span> Trả lời ngắn – Chỉ trộn thứ tự câu hỏi
+                </div>
+                
+                <div class="warning-box">
+                    <div style="font-weight:bold; color:#e65100; margin-bottom:5px;">⚠️ Lưu ý quan trọng:</div>
+                    <li>Mỗi câu hỏi bắt đầu bằng <span class="code-tag">Câu 1.</span>, <span class="code-tag">Câu 2.</span> ...</li>
+                    <li>Phương án trắc nghiệm: <span class="code-tag">A.</span> <span class="code-tag">B.</span> <span class="code-tag">C.</span> <span class="code-tag">D.</span></li>
+                    <li>Phương án đúng/sai: <span class="code-tag">a)</span> <span class="code-tag">b)</span> <span class="code-tag">c)</span> <span class="code-tag">d)</span></li>
+                    <li>Đáp án đúng có thể <span style="text-decoration:underline;">gạch chân</span> hoặc <span style="color:blue; font-weight:bold;">tô màu</span>.</li>
+                    <li style="margin-top:5px; border-top:1px dashed #ccc; padding-top:5px;">
+                        <b>Đáp án Phần 3 (Mới):</b> Ghi <span style="color:red; font-weight:bold;">ĐS: Kết quả</span> và tô đỏ.
+                    </li>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
         
-        uploaded_file = st.file_uploader("Chọn file (.docx)", type=["docx"], label_visibility="collapsed")
+        # 1.2 BƯỚC 1: UPLOAD & CHECK
+        st.markdown('<div class="step-label"><div class="step-badge">1</div>Chọn file đề Word (*.docx)</div>', unsafe_allow_html=True)
+        
+        uploaded_file = st.file_uploader("Kéo thả file vào đây", type=["docx"], label_visibility="collapsed")
         
         if uploaded_file:
             st.session_state['file_bytes'] = uploaded_file.getvalue()
             
-            # NÚT KIỂM TRA FILE
-            if st.button("🔍 Kiểm tra lỗi & Cấu trúc"):
+            # Button kiểm tra
+            if st.button("🔍 Kiểm tra cấu trúc & Lỗi"):
                 try:
                     input_buffer = io.BytesIO(st.session_state['file_bytes'])
                     zip_in = zipfile.ZipFile(input_buffer, 'r')
@@ -453,71 +506,82 @@ def main():
                     
                     errors, warnings = validate_document(blocks)
                     
-                    # LOGIC HIỂN THỊ LỖI / SỬA LỖI
-                    st.markdown('<div class="validation-box">', unsafe_allow_html=True)
-                    
                     if not errors and not warnings:
-                        st.success("✅ File Tuyệt Vời! Chuẩn cấu trúc.")
+                        st.success("✅ File chuẩn! Sẵn sàng trộn.")
                         st.session_state['is_valid'] = True
                         st.session_state['auto_fix_img'] = False
                     else:
                         if errors:
-                            st.error(f"Phát hiện {len(errors)} lỗi nghiêm trọng (Cần sửa trong Word):")
+                            st.error(f"❌ Phát hiện {len(errors)} lỗi (Cần sửa trong Word):")
                             for e in errors: st.write(e)
                             st.session_state['is_valid'] = False
                         else:
-                            st.session_state['is_valid'] = True # Chỉ có warning thì vẫn cho trộn
+                            st.session_state['is_valid'] = True
 
                         if warnings:
                             st.warning(f"⚠️ {len(warnings)} hình ảnh bị trôi (Floating).")
-                            st.write("👉 Hệ thống sẽ TỰ ĐỘNG SỬA khi bấm nút Trộn bên phải.")
+                            st.info("💡 Hệ thống sẽ TỰ ĐỘNG SỬA khi bấm Trộn.")
                             st.session_state['auto_fix_img'] = True
-                    
-                    st.markdown('</div>', unsafe_allow_html=True)
-
-                except Exception as e:
+                except:
                     st.error("Lỗi đọc file. File bị hỏng.")
-
-        st.markdown('</div>', unsafe_allow_html=True)
 
     # --- CỘT PHẢI ---
     with col_right:
-        # BƯỚC 2: CẤU HÌNH (GỘP BƯỚC 2 & 3 vào 1 thẻ để tiết kiệm chỗ)
-        st.markdown('<div class="step-card">', unsafe_allow_html=True)
-        st.markdown('<div class="card-header"><div class="step-number">2</div><div class="step-title">Cấu hình & Xử lý</div></div>', unsafe_allow_html=True)
+        # BƯỚC 2: KIỂU TRỘN (Thiết kế dạng Card ngang)
+        st.markdown('<div class="step-label"><div class="step-badge">2</div>Chọn kiểu trộn</div>', unsafe_allow_html=True)
         
-        c_cfg1, c_cfg2 = st.columns(2)
-        with c_cfg1:
-            mode = st.selectbox("Kiểu trộn", ["auto", "mcq", "tf"], format_func=lambda x: {"auto":"Tự động", "mcq":"Trắc nghiệm", "tf":"Đúng/Sai"}[x])
-        with c_cfg2:
-            num_mix = st.number_input("Số đề", 1, 50, 4)
-            
-        st.write("")
-        # NÚT XỬ LÝ CHÍNH
-        if st.button("🚀 TRỘN ĐỀ & TẢI XUỐNG"):
+        # Dùng radio button với format đặc biệt để giả lập giao diện Card
+        mode = st.radio(
+            "Mode",
+            ["auto", "mcq", "tf"],
+            format_func=lambda x: {
+                "auto": "🔄 Tự động\n(Phần 1, 2, 3)",
+                "mcq": "📝 Trắc nghiệm\n(Toàn bộ A.B.C.D)",
+                "tf": "✅ Đúng/Sai\n(Toàn bộ a)b)c)d))"
+            }[x],
+            label_visibility="collapsed",
+            horizontal=True
+        )
+        
+        st.write("") # Spacer
+
+        # BƯỚC 3: SỐ LƯỢNG
+        st.markdown('<div class="step-label"><div class="step-badge">3</div>Số mã đề cần tạo</div>', unsafe_allow_html=True)
+        
+        c_num1, c_num2 = st.columns([1, 2])
+        with c_num1:
+            num_mix = st.number_input("Số lượng", 1, 50, 4, label_visibility="collapsed")
+        with c_num2:
+            st.markdown("""
+            <div style="font-size:0.9rem; color:#666; padding-top:10px;">
+                ● 1 mã → File Word<br>● Nhiều mã → File ZIP
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("---")
+        
+        # NÚT XỬ LÝ
+        if st.button("🚀 Trộn đề & Tải xuống"):
             if 'file_bytes' in st.session_state and st.session_state.get('is_valid', True):
                 with st.spinner("Đang xử lý..."):
-                    # Tự động fix ảnh nếu có warning
                     do_fix = st.session_state.get('auto_fix_img', True)
                     try:
                         z_data, e_data = process_document_final(
                             st.session_state['file_bytes'], num_mix, "KiemTra", do_fix, mode
                         )
-                        st.success("Xong!")
+                        st.success("Thành công!")
                         d1, d2 = st.columns(2)
                         with d1:
-                            st.download_button("📥 File Đề", z_data, "De_Tron.zip", "application/zip", use_container_width=True)
+                            st.download_button("📥 Tải Đề (ZIP)", z_data, "De_Tron.zip", "application/zip", use_container_width=True)
                         with d2:
-                            st.download_button("📊 Đáp án", e_data, "Dap_An.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
+                            st.download_button("📊 Đáp án (Excel)", e_data, "Dap_An.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
                     except Exception as e:
                         st.error(f"Lỗi: {e}")
             else:
-                st.warning("Vui lòng Upload & Kiểm tra file trước (Cột trái).")
-                
-        st.markdown('</div>', unsafe_allow_html=True)
+                st.warning("Vui lòng tải file & kiểm tra ở Bước 1 trước.")
 
     # Footer
-    st.markdown('<div style="text-align:center; color: #aaa; font-size: 0.8rem; margin-top:10px;">© 2025 Phan Trường Duy</div>', unsafe_allow_html=True)
+    st.markdown('<div style="text-align:center; color: #aaa; margin-top:20px; font-size:0.8rem;">© 2025 Phan Trường Duy - THPT Minh Đức</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
