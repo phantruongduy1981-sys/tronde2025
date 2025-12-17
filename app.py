@@ -1,5 +1,5 @@
 """
-Trộn Đề Word Online - AIOMT Premium (Final Complete - Validated)
+Trộn Đề Word Online - AIOMT Premium (Final Complete Fixed)
 Author: Phan Trường Duy - THPT Minh Đức
 """
 
@@ -21,39 +21,43 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ==================== CSS CUSTOM DESIGN ====================
+# ==================== CSS CUSTOM DESIGN (ĐÃ SỬA THEO YÊU CẦU) ====================
 st.markdown("""
 <style>
-    /* 1. HEADER */
+    /* 1. HEADER (Đã thu gọn chiều cao 75%, nét chữ đều) */
     .main-header {
         text-align: center;
-        padding: 2rem 0;
+        padding: 1.2rem 0; /* Giảm padding để thu gọn chiều cao */
         background: linear-gradient(to right, #009688, #00796b);
         color: white;
         border-radius: 0 0 15px 15px;
         margin-bottom: 2rem;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
     .main-header h1 {
         font-family: 'Arial', sans-serif;
-        font-weight: 900;
-        font-size: 2.8rem;
+        font-weight: 700; /* Nét chữ đều (Bold chuẩn) */
+        font-size: 2.2rem;
         text-transform: uppercase;
-        margin: 0;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        margin: 0; /* Bỏ margin để khít dòng dưới */
+        line-height: 1.2;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
     }
     .main-header p {
-        font-size: 1.1rem;
-        margin-top: 10px;
+        font-family: 'Arial', sans-serif;
+        font-size: 1rem;
+        margin-top: 5px; /* Khoảng cách nhỏ với dòng trên */
+        margin-bottom: 0;
         opacity: 0.9;
-        letter-spacing: 2px;
+        font-weight: 400; /* Nét thanh hơn */
+        letter-spacing: 1px;
     }
 
-    /* 2. STYLE CHO THẺ (CARD) & BƯỚC */
+    /* 2. STYLE CHO THẺ (CARD) */
     .step-label {
         font-size: 1.1rem;
         font-weight: 700;
-        color: #263238;
+        color: #004d40;
         margin-bottom: 10px;
         display: flex;
         align-items: center;
@@ -69,15 +73,16 @@ st.markdown("""
         justify-content: center;
         margin-right: 10px;
         font-size: 0.9rem;
+        font-weight: bold;
     }
 
     /* 3. KHUNG HƯỚNG DẪN */
     .instruction-card {
         background-color: #e0f2f1;
         border-radius: 10px;
-        padding: 20px;
+        padding: 15px;
         color: #004d40;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         border: 1px solid #b2dfdb;
     }
     .part-title {
@@ -90,13 +95,13 @@ st.markdown("""
         background-color: #fff8e1;
         border: 1px solid #ffe082;
         border-radius: 8px;
-        padding: 15px;
-        margin-top: 15px;
+        padding: 10px;
+        margin-top: 10px;
         color: #5d4037;
     }
     .code-tag {
         background-color: #fff;
-        padding: 2px 6px;
+        padding: 2px 5px;
         border-radius: 4px;
         border: 1px solid #e0e0e0;
         font-family: monospace;
@@ -108,14 +113,14 @@ st.markdown("""
     div[role="radiogroup"] {
         display: flex;
         flex-direction: column; 
-        gap: 12px;
+        gap: 10px;
     }
     div[role="radiogroup"] > label {
         width: 100%;
         background-color: white;
         border: 1px solid #cfd8dc;
         border-radius: 8px;
-        padding: 15px;
+        padding: 12px;
         display: flex;
         align-items: center;
         transition: all 0.2s;
@@ -132,7 +137,7 @@ st.markdown("""
     .stFileUploader {
         border: 2px dashed #009688;
         border-radius: 10px;
-        padding: 20px;
+        padding: 15px;
         background-color: white;
         text-align: center;
     }
@@ -148,6 +153,7 @@ st.markdown("""
         width: 100%;
         font-size: 1.1rem;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-top: 10px;
     }
     .stButton > button:hover {
         background: #00796b;
@@ -158,7 +164,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ==================== CORE LOGIC ====================
+# ==================== CORE LOGIC (XỬ LÝ WORD) ====================
 W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
 def get_pure_text(block):
@@ -203,12 +209,14 @@ def style_run_blue_bold(run):
     else:
         rPr = doc.createElementNS(W_NS, "w:rPr")
         run.insertBefore(rPr, run.firstChild)
+    
     color_list = rPr.getElementsByTagNameNS(W_NS, "color")
     if color_list: color_el = color_list[0]
     else:
         color_el = doc.createElementNS(W_NS, "w:color")
         rPr.appendChild(color_el)
     color_el.setAttributeNS(W_NS, "w:val", "0000FF")
+    
     b_list = rPr.getElementsByTagNameNS(W_NS, "b")
     if not b_list:
         b_el = doc.createElementNS(W_NS, "w:b")
@@ -267,8 +275,7 @@ def parse_questions_in_range(blocks, start, end):
     questions = []
     i = 0
     while i < len(part_blocks):
-        text = get_pure_text(part_blocks[i])
-        if re.match(r'^Câu\s*\d+\b', text, re.IGNORECASE): break
+        if re.match(r'^Câu\s*\d+\b', get_pure_text(part_blocks[i]), re.IGNORECASE): break
         intro.append(part_blocks[i])
         i += 1
     while i < len(part_blocks):
@@ -378,52 +385,28 @@ def fix_floating_images_in_xml(doc_xml_str):
         anchor.parentNode.replaceChild(inline, anchor)
     return dom.toxml()
 
-# --- HÀM VALIDATE (THÊM LẠI ĐỂ SỬA LỖI NAME ERROR) ---
-def check_mcq_options(q_blocks):
-    text_content = " ".join([get_pure_text(b) for b in q_blocks])
-    options_found = re.findall(r'\b([A-D])[\.\)]', text_content)
-    unique_opts = set(opt.upper() for opt in options_found)
-    missing = []
-    for char in ['A', 'B', 'C', 'D']:
-        if char not in unique_opts: missing.append(char)
-    has_correct = False
-    for block in q_blocks:
-        runs = block.getElementsByTagNameNS(W_NS, "r")
-        for r in runs:
-            if is_answer_marked(r):
-                t_nodes = r.getElementsByTagNameNS(W_NS, "t")
-                t_val = "".join([t.firstChild.nodeValue for t in t_nodes if t.firstChild])
-                if t_val.strip(): has_correct = True; break
-        if has_correct: break
-    return missing, has_correct
-
+# --- HÀM VALIDATE (Đã được bổ sung) ---
 def validate_document(blocks):
     errors = []
     warnings = []
-    # Tách sơ bộ để kiểm tra
-    intro, questions = parse_questions_in_range(blocks, 0, len(blocks))
     
-    for idx, q_blocks in enumerate(questions):
-        q_label = f"Câu {idx + 1}" # Index tạm thời
+    # Kiểm tra đơn giản: Có "Câu 1" và có "A." không
+    full_text = " ".join([get_pure_text(b) for b in blocks])
+    
+    if not re.search(r'Câu\s*1', full_text, re.IGNORECASE):
+        errors.append("❌ Không tìm thấy 'Câu 1'. Vui lòng kiểm tra lại định dạng.")
         
-        # Check image floating
-        for b in q_blocks:
-            if b.getElementsByTagName("wp:anchor"):
-                warnings.append(f"{q_label}")
-                
-        # Check logic
-        q_text = " ".join([get_pure_text(b) for b in q_blocks])
-        if re.search(r'\bA[\.\)]', q_text) and re.search(r'\bD[\.\)]', q_text):
-            missing, has_correct = check_mcq_options(q_blocks)
-            if missing: errors.append(f"❌ {q_label}: Thiếu {', '.join(missing)}")
-            if not has_correct: errors.append(f"❌ {q_label}: Chưa tô đáp án")
-        elif "ĐS" in q_text or "đs" in q_text:
-            has_red_ds = False
-            for b in q_blocks:
-                runs = b.getElementsByTagNameNS(W_NS, "r")
-                for r in runs:
-                    if is_answer_marked(r): has_red_ds = True; break
-            if not has_red_ds: errors.append(f"❌ {q_label}: 'ĐS' chưa tô đỏ")
+    if not re.search(r'A\.', full_text) and not re.search(r'A\)', full_text):
+        warnings.append("⚠️ Cảnh báo: Không tìm thấy đáp án A. B. C. D. (Có thể do file chỉ có tự luận)")
+        
+    # Check ảnh trôi
+    has_floating = False
+    for b in blocks:
+        if b.getElementsByTagName("wp:anchor"):
+            has_floating = True
+            break
+    if has_floating:
+        warnings.append("⚠️ File có chứa hình ảnh dạng Floating (Trôi). Hệ thống sẽ tự động sửa.")
             
     return errors, warnings
 
@@ -436,92 +419,109 @@ def process_document_final(file_bytes, num_versions, filename_prefix, auto_fix_i
     if auto_fix_img: doc_xml = fix_floating_images_in_xml(doc_xml)
     
     dom = minidom.parseString(doc_xml)
-    body = dom.getElementsByTagNameNS(W_NS, "body")[0]
+    all_keys = []
+    zip_out_buffer = io.BytesIO()
     
-    sectPr = None
-    if body.lastChild and body.lastChild.localName == 'sectPr':
-        sectPr = body.lastChild.cloneNode(True)
-        
-    blocks = [n for n in body.childNodes if n.nodeType == n.ELEMENT_NODE and n.localName in ["p", "tbl"]]
-    
-    part1_idx = find_part_index(blocks, 1)
-    part2_idx = find_part_index(blocks, 2)
-    part3_idx = find_part_index(blocks, 3)
-    
-    parts = {"intro": [], "p1": [], "p2": [], "p3": []}
-    cur = 0
-    if shuffle_mode == "auto":
-        if part1_idx >= 0:
-            parts["intro"] = blocks[cur:part1_idx+1]
-            cur = part1_idx+1
-            end1 = part2_idx if part2_idx >= 0 else (part3_idx if part3_idx >= 0 else len(blocks))
-            parts["p1"] = blocks[cur:end1]
-            cur = end1
-        else:
-            parts["p1"] = blocks
-            cur = len(blocks)
-        if part2_idx >= 0:
-            end2 = part3_idx if part3_idx >= 0 else len(blocks)
-            parts["p2"] = blocks[cur:end2]
-            cur = end2
-        if part3_idx >= 0:
-            parts["p3"] = blocks[cur:]
-    elif shuffle_mode == "mcq":
-        parts["p1"] = blocks
-    elif shuffle_mode == "tf":
-        parts["p2"] = blocks
-
-    final_blocks = []
-    final_blocks.extend(parts["intro"])
-    answer_key = {"Mã đề": version_name}
-    g_idx = 1
-    
-    if parts["p1"]:
-        intro1, qs1 = parse_questions_in_range(parts["p1"], 0, len(parts["p1"]))
-        final_blocks.extend(intro1)
-        random.shuffle(qs1)
-        for q in qs1:
-            update_question_label(q[0], f"Câu {g_idx}.")
-            new_q, ans = process_mcq_question_with_key(q)
-            final_blocks.extend(new_q)
-            if ans: answer_key[f"Câu {g_idx}"] = ans
-            g_idx += 1
+    with zipfile.ZipFile(zip_out_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_final:
+        for i in range(num_versions):
+            v_name = f"{101 + i}"
+            dom_v = minidom.parseString(doc_xml)
+            body_v = dom_v.getElementsByTagNameNS(W_NS, "body")[0]
             
-    if parts["p2"]:
-        intro2, qs2 = parse_questions_in_range(parts["p2"], 0, len(parts["p2"]))
-        final_blocks.extend(intro2)
-        random.shuffle(qs2)
-        for q in qs2:
-            update_question_label(q[0], f"Câu {g_idx}.")
-            new_q = process_tf_question(q)
-            final_blocks.extend(new_q)
-            g_idx += 1
-            
-    if parts["p3"]:
-        intro3, qs3 = parse_questions_in_range(parts["p3"], 0, len(parts["p3"]))
-        final_blocks.extend(intro3)
-        random.shuffle(qs3)
-        for q in qs3:
-            update_question_label(q[0], f"Câu {g_idx}.")
-            final_blocks.extend(q)
-            ans = extract_part3_answer(q)
-            if ans: answer_key[f"Câu {g_idx}"] = ans
-            g_idx += 1
-    
-    while body.hasChildNodes(): body.removeChild(body.firstChild)
-    for b in final_blocks: body.appendChild(b)
-    if sectPr: body.appendChild(sectPr)
-    
-    new_xml = dom.toxml()
-    output_buffer = io.BytesIO()
-    with zipfile.ZipFile(output_buffer, 'w', zipfile.ZIP_DEFLATED) as zout:
-        for item in zip_in.infolist():
-            if item.filename == "word/document.xml":
-                zout.writestr(item, new_xml.encode('utf-8'))
-            else:
-                zout.writestr(item, zin.read(item.filename))
+            # Save sectPr
+            sectPr = None
+            if body_v.lastChild and body_v.lastChild.localName == 'sectPr':
+                sectPr = body_v.lastChild.cloneNode(True)
                 
-    return output_buffer.getvalue(), answer_key
+            blocks_v = [n for n in body_v.childNodes if n.nodeType == n.ELEMENT_NODE and n.localName in ["p", "tbl"]]
+            
+            parts = {"intro": [], "p1": [], "p2": [], "p3": []}
+            cur = 0
+            
+            # Logic chia phần
+            p1_i = find_part_index(blocks_v, 1)
+            p2_i = find_part_index(blocks_v, 2)
+            p3_i = find_part_index(blocks_v, 3)
+            
+            if shuffle_mode == "auto":
+                if p1_i >= 0:
+                    parts["intro"] = blocks_v[cur:p1_i+1]
+                    cur = p1_i+1
+                    end1 = p2_i if p2_i >= 0 else (p3_i if p3_i >= 0 else len(blocks_v))
+                    parts["p1"] = blocks_v[cur:end1]
+                    cur = end1
+                else:
+                    parts["p1"] = blocks_v
+                    cur = len(blocks_v)
+                if p2_i >= 0:
+                    end2 = p3_i if p3_i >= 0 else len(blocks_v)
+                    parts["p2"] = blocks_v[cur:end2]
+                    cur = end2
+                if p3_i >= 0:
+                    parts["p3"] = blocks_v[cur:]
+            elif shuffle_mode == "mcq":
+                parts["p1"] = blocks_v
+            elif shuffle_mode == "tf":
+                parts["p2"] = blocks_v
+
+            final_layout = []
+            final_layout.extend(parts["intro"])
+            ans_key = {"Mã đề": v_name}
+            g_idx = 1
+            
+            if parts["p1"]:
+                intro1, qs1 = parse_questions_in_range(parts["p1"], 0, len(parts["p1"]))
+                final_layout.extend(intro1)
+                random.shuffle(qs1)
+                for q in qs1:
+                    update_question_label(q[0], f"Câu {g_idx}.")
+                    pb, ans = process_mcq_question_with_key(q)
+                    final_layout.extend(pb)
+                    if ans: ans_key[f"Câu {g_idx}"] = ans
+                    g_idx += 1
+            if parts["p2"]:
+                intro2, qs2 = parse_questions_in_range(parts["p2"], 0, len(parts["p2"]))
+                final_layout.extend(intro2)
+                random.shuffle(qs2)
+                for q in qs2:
+                    update_question_label(q[0], f"Câu {g_idx}.")
+                    pb = process_tf_question(q)
+                    final_layout.extend(pb)
+                    g_idx += 1
+            if parts["p3"]:
+                intro3, qs3 = parse_questions_in_range(parts["p3"], 0, len(parts["p3"]))
+                final_layout.extend(intro3)
+                random.shuffle(qs3)
+                for q in qs3:
+                    update_question_label(q[0], f"Câu {g_idx}.")
+                    final_layout.extend(q)
+                    val = extract_part3_answer(q)
+                    if val: ans_key[f"Câu {g_idx}"] = val
+                    g_idx += 1
+            
+            while body_v.hasChildNodes(): body_v.removeChild(body_v.firstChild)
+            for b in final_layout: body_v.appendChild(b)
+            if sectPr: body_v.appendChild(sectPr)
+            
+            ver_io = io.BytesIO()
+            with zipfile.ZipFile(ver_io, 'w', zipfile.ZIP_DEFLATED) as z_ver:
+                for item in zip_in.infolist():
+                    if item.filename == "word/document.xml":
+                        z_ver.writestr(item, dom_v.toxml().encode('utf-8'))
+                    else:
+                        z_ver.writestr(item, zip_in.read(item.filename))
+            zip_final.writestr(f"{filename_prefix}_{v_name}.docx", ver_io.getvalue())
+            all_keys.append(ans_key)
+            
+    df = pd.DataFrame(all_keys)
+    cols = list(df.columns)
+    if "Mã đề" in cols: cols.remove("Mã đề")
+    q_cols = sorted(cols, key=lambda s: int(re.search(r'(\d+)', s).group(1)) if re.search(r'(\d+)', s) else 0)
+    df = df.reindex(columns=["Mã đề"] + q_cols)
+    excel_buf = io.BytesIO()
+    with pd.ExcelWriter(excel_buf, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False, sheet_name='DapAn')
+    return zip_out_buffer.getvalue(), excel_buf.getvalue()
 
 # ==================== MAIN UI ====================
 
@@ -535,6 +535,7 @@ def main():
 
     col_left, col_right = st.columns([1, 1], gap="medium")
 
+    # --- CỘT TRÁI ---
     with col_left:
         with st.expander("📄 Hướng dẫn & Cấu trúc (Bấm để xem)", expanded=False):
             st.markdown("""
@@ -566,7 +567,7 @@ style="background-color:#009688; color:white; padding:5px 10px; border-radius:5p
         uploaded_file = st.file_uploader("Kéo thả file vào đây", type=["docx"], label_visibility="collapsed")
         
         if uploaded_file is not None:
-            # FIX: Reset pointer & Save Session
+            # FIX: Lưu file vào session để không bị mất khi rerun
             uploaded_file.seek(0)
             st.session_state['file_bytes'] = uploaded_file.read()
             st.success(f"✅ Đã tải lên: {uploaded_file.name}")
@@ -579,6 +580,7 @@ style="background-color:#009688; color:white; padding:5px 10px; border-radius:5p
                     dom = minidom.parseString(doc_xml)
                     body = dom.getElementsByTagNameNS(W_NS, "body")[0]
                     blocks = [n for n in body.childNodes if n.nodeType == n.ELEMENT_NODE and n.localName in ["p", "tbl"]]
+                    
                     errors, warnings = validate_document(blocks)
                     
                     if not errors and not warnings:
@@ -591,19 +593,25 @@ style="background-color:#009688; color:white; padding:5px 10px; border-radius:5p
                             for e in errors: st.write(e)
                             st.session_state['is_valid'] = False
                         else:
-                            st.session_state['is_valid'] = True
+                            st.session_state['is_valid'] = True # Chỉ có warning
+                        
                         if warnings:
                             st.warning(f"⚠️ {len(warnings)} hình ảnh bị trôi.")
-                            st.info("💡 Hệ thống sẽ tự động sửa.")
+                            st.info("💡 Hệ thống sẽ tự động sửa khi trộn.")
                             st.session_state['auto_fix_img'] = True
                 except Exception as e:
                     st.error(f"Lỗi đọc file: {str(e)}")
 
+    # --- CỘT PHẢI ---
     with col_right:
         st.markdown('<div class="step-label"><div class="step-badge">2</div>Chọn kiểu trộn</div>', unsafe_allow_html=True)
-        mode = st.radio("Mode", ["auto", "mcq", "tf"], format_func=lambda x: {
-            "auto": "🔄 Tự động (Phần 1, 2, 3)", "mcq": "📝 Trắc nghiệm", "tf": "✅ Đúng/Sai"
-        }[x], label_visibility="collapsed", horizontal=False)
+        mode = st.radio(
+            "Mode", ["auto", "mcq", "tf"],
+            format_func=lambda x: {
+                "auto": "🔄 Tự động (Phần 1, 2, 3)", "mcq": "📝 Trắc nghiệm", "tf": "✅ Đúng/Sai"
+            }[x],
+            label_visibility="collapsed", horizontal=False
+        )
         
         st.write("")
         st.markdown('<div class="step-label"><div class="step-badge">3</div>Số mã đề cần tạo</div>', unsafe_allow_html=True)
@@ -621,24 +629,9 @@ style="background-color:#009688; color:white; padding:5px 10px; border-radius:5p
                     with st.spinner("Đang xử lý..."):
                         do_fix = st.session_state.get('auto_fix_img', True)
                         try:
-                            all_keys = []
-                            zip_buffer = io.BytesIO()
-                            with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zout:
-                                for i in range(num_mix):
-                                    v_name = f"{101 + i}"
-                                    doc_bytes, key = process_document_final(
-                                        st.session_state['file_bytes'], 1, "KiemTra", do_fix, mode
-                                    ) # Gọi hàm 1 lần cho 1 đề để loop ở ngoài
-                                    # À process_document_final trong code này đang loop bên trong rồi
-                                    # Sửa lại: process_document_final trả về zip luôn. 
-                                    # Nhưng để custom tên file từng cái, ta nên dùng hàm loop bên trong process_document_final
-                                    pass
-                            
-                            # GỌI HÀM CHÍNH (Đã tích hợp loop bên trong)
                             z_data, e_data = process_document_final(
                                 st.session_state['file_bytes'], num_mix, "KiemTra", do_fix, mode
                             )
-                                
                             st.success("Thành công!")
                             d1, d2 = st.columns(2)
                             with d1:
@@ -648,7 +641,7 @@ style="background-color:#009688; color:white; padding:5px 10px; border-radius:5p
                         except Exception as e:
                             st.error(f"Lỗi xử lý: {e}")
                 else:
-                    st.error("File lỗi. Vui lòng kiểm tra lại.")
+                    st.error("File có lỗi cấu trúc. Vui lòng kiểm tra lại.")
             else:
                 st.warning("Vui lòng tải file ở Bước 1.")
 
