@@ -1,5 +1,5 @@
 """
-Trộn Đề Word Online - AIOMT Premium (Vertical Radio Cards)
+Trộn Đề Word Online - AIOMT Premium (Fixed HTML & Vertical Layout)
 Author: Phan Trường Duy - THPT Minh Đức
 """
 
@@ -105,27 +105,26 @@ st.markdown("""
     }
 
     /* 4. CUSTOM RADIO BUTTONS (DẠNG THẺ DỌC) */
+    /* Buộc các thẻ radio xếp dọc */
     div[role="radiogroup"] {
         display: flex;
-        flex-direction: column; /* Quan trọng: Xếp dọc */
-        gap: 12px; /* Khoảng cách giữa các thẻ */
-        width: 100%;
+        flex-direction: column; 
+        gap: 10px;
     }
     div[role="radiogroup"] > label {
-        width: 100%;
         background-color: white;
         border: 1px solid #cfd8dc;
         border-radius: 8px;
-        padding: 15px; /* Tăng padding cho đẹp */
-        display: flex;
-        align-items: center;
+        padding: 15px;
         transition: all 0.2s;
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        margin-bottom: 0px !important; /* Fix khoảng cách thừa */
+        width: 100%;
     }
     div[role="radiogroup"] > label:hover {
         border-color: #009688;
         background-color: #f0fdfa;
-        transform: translateX(5px); /* Hiệu ứng di chuyển nhẹ khi hover */
+        transform: translateX(5px);
     }
     
     /* 5. UPLOAD BOX */
@@ -438,7 +437,7 @@ def process_document_final(file_bytes, num_versions, filename_prefix, auto_fix_i
 # ==================== MAIN UI ====================
 
 def main():
-    # 1. HEADER
+    # HEADER
     st.markdown("""
     <div class="main-header">
         <h1>TRƯỜNG THPT MINH ĐỨC</h1>
@@ -450,42 +449,42 @@ def main():
 
     # --- CỘT TRÁI ---
     with col_left:
-        # 1.1 HƯỚNG DẪN & CẤU TRÚC
+        # HƯỚNG DẪN & CẤU TRÚC (Code HTML không thụt dòng để tránh lỗi hiển thị)
         with st.expander("📄 Hướng dẫn & Cấu trúc (Bấm để xem)", expanded=False):
             st.markdown("""
-            <div style="text-align: right; margin-bottom: 10px;">
-                <a href="https://drive.google.com/file/d/1_2zhqxwoMQ-AINMfCqy6QbZyGU4Skg3n/view?usp=sharing" target="_blank" 
-                   style="background-color:#009688; color:white; padding:5px 10px; border-radius:5px; text-decoration:none; font-weight:bold;">
-                   📥 Tải File Mẫu
-                </a>
-            </div>
-            
-            <div class="instruction-card">
-                <div>📌 <b>Cấu trúc file Word chuẩn:</b></div>
-                <div style="margin-top:5px;">
-                    <span class="part-title">PHẦN 1:</span> Trắc nghiệm nhiều lựa chọn (A. B. C. D.) – Trộn cả câu hỏi + phương án
-                </div>
-                <div>
-                    <span class="part-title">PHẦN 2:</span> Đúng/Sai (a) b) c) d)) – Trộn câu hỏi + trộn a,b,c (giữ d cố định)
-                </div>
-                <div>
-                    <span class="part-title">PHẦN 3:</span> Trả lời ngắn – Chỉ trộn thứ tự câu hỏi
-                </div>
-                
-                <div class="warning-box">
-                    <div style="font-weight:bold; color:#e65100; margin-bottom:5px;">⚠️ Lưu ý quan trọng:</div>
-                    <li>Mỗi câu hỏi bắt đầu bằng <span class="code-tag">Câu 1.</span>, <span class="code-tag">Câu 2.</span> ...</li>
-                    <li>Phương án trắc nghiệm: <span class="code-tag">A.</span> <span class="code-tag">B.</span> <span class="code-tag">C.</span> <span class="code-tag">D.</span></li>
-                    <li>Phương án đúng/sai: <span class="code-tag">a)</span> <span class="code-tag">b)</span> <span class="code-tag">c)</span> <span class="code-tag">d)</span></li>
-                    <li>Đáp án đúng có thể <span style="text-decoration:underline;">gạch chân</span> hoặc <span style="color:blue; font-weight:bold;">tô màu</span>.</li>
-                    <li style="margin-top:5px; border-top:1px dashed #ccc; padding-top:5px;">
-                        <b>Đáp án Phần 3 (Mới):</b> Ghi <span style="color:red; font-weight:bold;">ĐS: Kết quả</span> và tô đỏ.
-                    </li>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+<div style="text-align: right; margin-bottom: 10px;">
+    <a href="https://drive.google.com/file/d/1_2zhqxwoMQ-AINMfCqy6QbZyGU4Skg3n/view?usp=sharing" target="_blank" 
+       style="background-color:#009688; color:white; padding:5px 10px; border-radius:5px; text-decoration:none; font-weight:bold;">
+       📥 Tải File Mẫu
+    </a>
+</div>
+
+<div class="instruction-card">
+    <div>📌 <b>Cấu trúc file Word chuẩn:</b></div>
+    <div style="margin-top:5px;">
+        <span class="part-title">PHẦN 1:</span> Trắc nghiệm nhiều lựa chọn (A. B. C. D.) – Trộn cả câu hỏi + phương án
+    </div>
+    <div>
+        <span class="part-title">PHẦN 2:</span> Đúng/Sai (a) b) c) d)) – Trộn câu hỏi + trộn a,b,c (giữ d cố định)
+    </div>
+    <div>
+        <span class="part-title">PHẦN 3:</span> Trả lời ngắn – Chỉ trộn thứ tự câu hỏi
+    </div>
+    
+    <div class="warning-box">
+        <div style="font-weight:bold; color:#e65100; margin-bottom:5px;">⚠️ Lưu ý quan trọng:</div>
+        <li>Mỗi câu hỏi bắt đầu bằng <span class="code-tag">Câu 1.</span>, <span class="code-tag">Câu 2.</span> ...</li>
+        <li>Phương án trắc nghiệm: <span class="code-tag">A.</span> <span class="code-tag">B.</span> <span class="code-tag">C.</span> <span class="code-tag">D.</span></li>
+        <li>Phương án đúng/sai: <span class="code-tag">a)</span> <span class="code-tag">b)</span> <span class="code-tag">c)</span> <span class="code-tag">d)</span></li>
+        <li>Đáp án đúng có thể <span style="text-decoration:underline;">gạch chân</span> hoặc <span style="color:blue; font-weight:bold;">tô màu</span>.</li>
+        <li style="margin-top:5px; border-top:1px dashed #ccc; padding-top:5px;">
+            <b>Đáp án Phần 3 (Mới):</b> Ghi <span style="color:red; font-weight:bold;">ĐS: Kết quả</span> và tô đỏ.
+        </li>
+    </div>
+</div>
+""", unsafe_allow_html=True)
         
-        # 1.2 BƯỚC 1: UPLOAD & CHECK
+        # BƯỚC 1: UPLOAD & CHECK
         st.markdown('<div class="step-label"><div class="step-badge">1</div>Chọn file đề Word (*.docx)</div>', unsafe_allow_html=True)
         
         uploaded_file = st.file_uploader("Kéo thả file vào đây", type=["docx"], label_visibility="collapsed")
@@ -526,10 +525,9 @@ def main():
 
     # --- CỘT PHẢI ---
     with col_right:
-        # BƯỚC 2: KIỂU TRỘN (CHỈNH SỬA: XUỐNG DÒNG)
+        # BƯỚC 2: KIỂU TRỘN (DẠNG DỌC)
         st.markdown('<div class="step-label"><div class="step-badge">2</div>Chọn kiểu trộn</div>', unsafe_allow_html=True)
         
-        # SỬ DỤNG horizontal=False ĐỂ XẾP DỌC
         mode = st.radio(
             "Mode",
             ["auto", "mcq", "tf"],
@@ -539,7 +537,7 @@ def main():
                 "tf": "✅ Đúng/Sai (Toàn bộ a)b)c)d))"
             }[x],
             label_visibility="collapsed",
-            horizontal=False # Xếp dọc
+            horizontal=False # Quan trọng: Xếp dọc
         )
         
         st.write("") # Spacer
