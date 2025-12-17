@@ -1,5 +1,5 @@
 """
-Trộn Đề Word Online - AIOMT Premium (Modern Teal UI - 2 Columns)
+Trộn Đề Word Online - AIOMT Premium (UI Update 3 Steps)
 Author: Phan Trường Duy - THPT Minh Đức
 """
 
@@ -17,119 +17,139 @@ import sys
 st.set_page_config(
     page_title="App Trộn Đề 2025",
     page_icon="📝",
-    layout="wide", # Dùng wide để chia 2 cột đẹp hơn trên PC
+    layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS: Tông màu Xanh Teal (Green/Teal) như hình mẫu
+# Custom CSS: Teal Theme & 3-Step Layout
 st.markdown("""
 <style>
-    /* 1. Header Gradient Xanh */
+    /* 1. Header Nhỏ gọn (50% kích thước cũ) */
     .main-header {
         text-align: center;
-        padding: 2rem 0;
-        background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
-        border-radius: 15px;
+        padding: 0.8rem 0; /* Giảm padding */
+        background: linear-gradient(135deg, #009688 0%, #00796b 100%);
+        border-radius: 8px;
         color: white;
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 10px rgba(22, 160, 133, 0.3);
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
     .main-header h1 {
         font-family: 'Arial', sans-serif;
-        font-weight: 800;
-        font-size: 2.5rem;
+        font-weight: 700;
+        font-size: 1.4rem; /* Font nhỏ hơn */
         margin: 0;
         text-transform: uppercase;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        letter-spacing: 1px;
     }
-    .main-header h2 {
-        font-size: 1.2rem;
-        font-weight: 400;
-        margin-top: 10px;
+    .main-header p {
+        font-size: 0.8rem;
+        margin: 0;
         opacity: 0.9;
+        font-style: italic;
     }
 
-    /* 2. Card Style (Khung trắng bo góc) */
-    .css-card {
-        background-color: white;
-        padding: 25px;
-        border-radius: 15px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        border: 1px solid #e0f2f1;
-        height: 100%;
+    /* 2. Step Badges (Số 1, 2, 3 tròn) */
+    .step-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
     }
-    
-    /* 3. Tiêu đề trong Card */
-    .card-title {
-        color: #16a085;
-        font-weight: bold;
-        font-size: 1.2rem;
-        margin-bottom: 15px;
-        border-bottom: 2px solid #b2dfdb;
-        padding-bottom: 10px;
-    }
-
-    /* 4. Nút bấm Xanh chủ đạo */
-    .stButton > button {
-        width: 100%;
-        background: linear-gradient(to right, #1abc9c, #16a085);
+    .step-badge {
+        background-color: #009688;
         color: white;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-weight: bold;
-        border: none;
-        padding: 0.8rem;
-        border-radius: 10px;
-        font-size: 1.1rem;
-        transition: all 0.3s;
-        box-shadow: 0 4px 6px rgba(26, 188, 156, 0.3);
+        margin-right: 10px;
+        font-size: 0.9rem;
     }
-    .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(26, 188, 156, 0.4);
-        color: white;
+    .step-title {
+        font-weight: 700;
+        color: #333;
+        font-size: 1rem;
     }
 
-    /* 5. Nút tải file mẫu (Secondary) */
-    .download-btn {
-        display: inline-block;
-        background-color: #e0f2f1;
-        color: #00695c;
-        padding: 8px 15px;
-        border-radius: 5px;
-        text-decoration: none;
-        font-weight: bold;
+    /* 3. Instruction Box (Giống hình mẫu) */
+    .instruction-box {
+        background-color: #e0f2f1; /* Xanh rất nhạt */
         border: 1px solid #b2dfdb;
-        text-align: center;
-        width: 100%;
-        margin-top: 10px;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
     }
-    .download-btn:hover {
-        background-color: #b2dfdb;
-    }
-
-    /* 6. File Uploader Container */
-    .stFileUploader {
-        border: 2px dashed #1abc9c;
-        border-radius: 10px;
-        padding: 10px;
-        background-color: #f0fdfa;
-    }
-
-    /* Background toàn trang */
-    .stApp {
-        background-color: #f4fcfb; /* Xanh rất nhạt */
-    }
-    
-    /* Expander style */
-    .streamlit-expanderHeader {
-        background-color: #e0f2f1;
+    .instruction-part {
+        margin-bottom: 5px;
         color: #00695c;
         font-weight: 600;
+    }
+    .warning-box {
+        background-color: #fff8e1; /* Vàng nhạt */
+        border: 1px solid #ffe082;
+        border-radius: 6px;
+        padding: 10px;
+        margin-top: 10px;
+        color: #795548;
+        font-size: 0.85rem;
+    }
+    .highlight-red { color: #d32f2f; font-weight: bold; }
+    .highlight-code { background: #eee; padding: 2px 4px; border-radius: 3px; font-family: monospace; }
+
+    /* 4. Card Style */
+    .css-card {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        border: 1px solid #f0f0f0;
+        height: 100%;
+    }
+
+    /* 5. Nút bấm Download File Mẫu */
+    .btn-sample {
+        display: inline-block;
+        background-color: #00897b;
+        color: white !important;
+        padding: 6px 12px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.8rem;
+        font-weight: bold;
+        float: right;
+    }
+    
+    /* 6. Main Action Button */
+    .stButton > button {
+        background: linear-gradient(to right, #009688, #00796b);
+        color: white;
+        border: none;
+        font-weight: bold;
+        width: 100%;
+        padding: 0.7rem;
+        border-radius: 6px;
+        font-size: 1.1rem;
+    }
+    .stButton > button:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        color: white;
+    }
+    
+    /* File Uploader Custom */
+    .stFileUploader {
+        border: 2px dashed #009688;
+        background: #f0fdfa;
         border-radius: 8px;
+        padding: 10px;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# ==================== CORE LOGIC (GIỮ NGUYÊN KHÔNG ĐỔI) ====================
+# ==================== CORE LOGIC (GIỮ NGUYÊN) ====================
 
 W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
@@ -145,12 +165,10 @@ def is_answer_marked(node):
     rPr_list = node.getElementsByTagNameNS(W_NS, "rPr")
     if not rPr_list: return False
     rPr = rPr_list[0]
-    
     color_list = rPr.getElementsByTagNameNS(W_NS, "color")
     if color_list:
         val = color_list[0].getAttributeNS(W_NS, "val")
         if val in ["red", "FF0000", "C00000"]: return True
-            
     u_list = rPr.getElementsByTagNameNS(W_NS, "u")
     if u_list:
         val = u_list[0].getAttributeNS(W_NS, "val")
@@ -164,7 +182,6 @@ def check_mcq_options(q_blocks):
     missing = []
     for char in ['A', 'B', 'C', 'D']:
         if char not in unique_opts: missing.append(char)
-            
     has_correct = False
     for block in q_blocks:
         runs = block.getElementsByTagNameNS(W_NS, "r")
@@ -196,7 +213,6 @@ def validate_document(blocks):
     questions = []
     current_q = []
     q_num_map = {}
-    
     for block in blocks:
         text = get_pure_text(block)
         m = re.match(r'^Câu\s*(\d+)', text, re.IGNORECASE)
@@ -213,7 +229,6 @@ def validate_document(blocks):
         for b in q_blocks:
             if b.getElementsByTagName("wp:anchor"):
                 warnings.append(f"{q_label}: Chứa hình ảnh trôi nổi (Floating).")
-
         q_text = " ".join([get_pure_text(b) for b in q_blocks])
         if re.search(r'\bA[\.\)]', q_text) and re.search(r'\bD[\.\)]', q_text):
             missing, has_correct = check_mcq_options(q_blocks)
@@ -281,21 +296,17 @@ def process_mcq_question(q_blocks):
         if re.match(r'^\s*[A-D][\.\)]', get_pure_text(block), re.IGNORECASE): options.append(block)
         else: header.append(block)
     if len(options) < 2: return q_blocks, ""
-    
     orig_idx = -1
     for idx, opt in enumerate(options):
         _, is_cor = get_text_with_formatting(opt)
         if is_cor: orig_idx = idx; break
-        
     perm = list(range(len(options)))
     random.shuffle(perm)
     shuffled_opts = [options[i] for i in perm]
-    
     new_char = ""
     if orig_idx != -1:
         try: new_char = ["A", "B", "C", "D", "E", "F"][perm.index(orig_idx)]
         except: pass
-        
     letters = ["A", "B", "C", "D", "E", "F"]
     for idx, opt in enumerate(shuffled_opts):
         l = letters[idx] if idx < len(letters) else "Z"
@@ -319,14 +330,13 @@ def find_part_index(blocks, p_num):
         if pat.search(get_pure_text(b)): return i
     return -1
 
-def process_document_final(file_bytes, num_versions, filename_prefix, auto_fix_img):
+def process_document_final(file_bytes, num_versions, filename_prefix, auto_fix_img, shuffle_mode="auto"):
     input_buffer = io.BytesIO(file_bytes)
     zip_in = zipfile.ZipFile(input_buffer, 'r')
     doc_xml = zip_in.read("word/document.xml").decode('utf-8')
-    
     if auto_fix_img: doc_xml, _ = fix_floating_images_in_xml(doc_xml)
-    dom = minidom.parseString(doc_xml)
     
+    dom = minidom.parseString(doc_xml)
     all_keys = []
     zip_out_buffer = io.BytesIO()
     
@@ -337,32 +347,42 @@ def process_document_final(file_bytes, num_versions, filename_prefix, auto_fix_i
             body_v = dom_v.getElementsByTagNameNS(W_NS, "body")[0]
             blocks_v = [n for n in body_v.childNodes if n.nodeType == n.ELEMENT_NODE and n.localName in ["p", "tbl"]]
             
-            p1_i = find_part_index(blocks_v, 1)
-            p2_i = find_part_index(blocks_v, 2)
-            p3_i = find_part_index(blocks_v, 3)
-            
             parts = {"intro": [], "p1": [], "p2": [], "p3": []}
-            cur = 0
-            if p1_i != -1:
-                parts["intro"] = blocks_v[cur:p1_i+1]
-                cur = p1_i+1
-                e1 = p2_i if p2_i!=-1 else (p3_i if p3_i!=-1 else len(blocks_v))
-                parts["p1"] = blocks_v[cur:e1]
-                cur = e1
-            else:
-                parts["p1"] = blocks_v
-                cur = len(blocks_v)
-            if p2_i != -1:
-                e2 = p3_i if p3_i!=-1 else len(blocks_v)
-                parts["p2"] = blocks_v[cur:e2]
-                cur = e2
-            if p3_i != -1: parts["p3"] = blocks_v[cur:]
             
+            # Logic chia phần dựa trên Mode
+            if shuffle_mode == "auto":
+                p1_i = find_part_index(blocks_v, 1)
+                p2_i = find_part_index(blocks_v, 2)
+                p3_i = find_part_index(blocks_v, 3)
+                
+                cur = 0
+                if p1_i != -1:
+                    parts["intro"] = blocks_v[cur:p1_i+1]
+                    cur = p1_i+1
+                    e1 = p2_i if p2_i!=-1 else (p3_i if p3_i!=-1 else len(blocks_v))
+                    parts["p1"] = blocks_v[cur:e1]
+                    cur = e1
+                else:
+                    parts["p1"] = blocks_v # Mặc định nếu ko tìm thấy phần nào -> P1 (MCQ)
+                    cur = len(blocks_v)
+                if p2_i != -1:
+                    e2 = p3_i if p3_i!=-1 else len(blocks_v)
+                    parts["p2"] = blocks_v[cur:e2]
+                    cur = e2
+                if p3_i != -1: parts["p3"] = blocks_v[cur:]
+            
+            elif shuffle_mode == "mcq":
+                parts["p1"] = blocks_v # Coi toàn bộ là MCQ
+            
+            elif shuffle_mode == "tf":
+                parts["p2"] = blocks_v # Coi toàn bộ là Đúng Sai
+                
             final_layout = []
             final_layout.extend(parts["intro"])
             ans_key = {"Mã đề": v_name}
             g_idx = 1
             
+            # P1 Mix
             if parts["p1"]:
                 qs = parse_questions(parts["p1"])
                 random.shuffle(qs)
@@ -372,6 +392,7 @@ def process_document_final(file_bytes, num_versions, filename_prefix, auto_fix_i
                     final_layout.extend(pb)
                     if ans: ans_key[f"Câu {g_idx}"] = ans
                     g_idx += 1
+            # P2 Mix
             if parts["p2"]:
                 final_layout.extend([parts["p2"][0]] if parts["p2"] else [])
                 qs = parse_questions(parts["p2"][1:] if len(parts["p2"])>1 else [])
@@ -380,6 +401,7 @@ def process_document_final(file_bytes, num_versions, filename_prefix, auto_fix_i
                     update_question_label(q[0], g_idx)
                     final_layout.extend(q)
                     g_idx += 1
+            # P3 Mix
             if parts["p3"]:
                 final_layout.extend([parts["p3"][0]] if parts["p3"] else [])
                 qs = parse_questions(parts["p3"][1:] if len(parts["p3"])>1 else [])
@@ -410,41 +432,48 @@ def process_document_final(file_bytes, num_versions, filename_prefix, auto_fix_i
     if "Mã đề" in cols: cols.remove("Mã đề")
     q_cols = sorted(cols, key=lambda s: int(re.search(r'(\d+)', s).group(1)) if re.search(r'(\d+)', s) else 0)
     df = df.reindex(columns=["Mã đề"] + q_cols)
-    
     excel_buf = io.BytesIO()
     with pd.ExcelWriter(excel_buf, engine='xlsxwriter') as writer:
         df.to_excel(writer, index=False, sheet_name='DapAn')
-        
     return zip_out_buffer.getvalue(), excel_buf.getvalue()
 
 # ==================== MAIN UI ====================
 
 def main():
-    # 1. HEADER CHÍNH (Full Width)
+    # HEADER NHỎ GỌN (50% so với trước)
     st.markdown("""
     <div class="main-header">
         <h1>TRƯỜNG THPT MINH ĐỨC</h1>
-        <h2>APP TRỘN ĐỀ 2025</h2>
+        <p>APP TRỘN ĐỀ 2025</p>
     </div>
     """, unsafe_allow_html=True)
 
-    # 2. CHIA 2 CỘT CHÍNH
+    # LAYOUT 2 CỘT (Trái: Upload - Phải: Cấu hình)
     col_left, col_right = st.columns([1, 1], gap="medium")
 
-    # --- CỘT TRÁI (UPLOAD & TRẠNG THÁI) ---
+    # --- CỘT TRÁI ---
     with col_left:
         st.markdown('<div class="css-card">', unsafe_allow_html=True)
-        st.markdown('<div class="card-title">📂 BƯỚC 1: TẢI ĐỀ GỐC</div>', unsafe_allow_html=True)
+        # Bước 1
+        st.markdown("""
+        <div class="step-container">
+            <div class="step-badge">1</div>
+            <div class="step-title">Chọn file đề Word (*.docx)</div>
+        </div>
+        """, unsafe_allow_html=True)
         
-        uploaded_file = st.file_uploader("Kéo thả hoặc chọn file (.docx)", type=["docx"])
+        uploaded_file = st.file_uploader("Kéo thả file hoặc click để chọn", type=["docx"], label_visibility="collapsed")
         
+        # Logic Upload
         if uploaded_file:
-            st.info(f"📄 Đã nhận: {uploaded_file.name}")
-            # Đọc file ngay để validate
-            file_bytes = uploaded_file.getvalue()
-            
+            st.session_state['file_bytes'] = uploaded_file.getvalue()
+            st.success(f"✅ Đã nhận: {uploaded_file.name}")
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        # Preview hoặc Log lỗi (nếu cần) hiển thị ở đây
+        if 'file_bytes' in st.session_state:
             try:
-                input_buffer = io.BytesIO(file_bytes)
+                input_buffer = io.BytesIO(st.session_state['file_bytes'])
                 zip_in = zipfile.ZipFile(input_buffer, 'r')
                 doc_xml = zip_in.read("word/document.xml").decode('utf-8')
                 dom = minidom.parseString(doc_xml)
@@ -455,75 +484,110 @@ def main():
                 if errors:
                     st.error("🚫 File lỗi cấu trúc:")
                     for e in errors: st.write(e)
-                    st.session_state['file_valid'] = False
+                    st.session_state['is_valid'] = False
                 else:
-                    st.success("✅ File chuẩn cấu trúc!")
-                    st.session_state['file_valid'] = True
-                    st.session_state['file_bytes'] = file_bytes
-                    
+                    st.session_state['is_valid'] = True
                     if warnings:
                         with st.expander("⚠️ Cảnh báo hình ảnh"):
                             for w in warnings: st.write(w)
-            except Exception as e:
-                st.error("File lỗi, không đọc được.")
-                st.session_state['file_valid'] = False
-        else:
-            st.session_state['file_valid'] = False
+            except: pass
 
-        st.markdown('</div>', unsafe_allow_html=True) # End Card Left
-
-    # --- CỘT PHẢI (HƯỚNG DẪN & CẤU HÌNH) ---
+    # --- CỘT PHẢI ---
     with col_right:
         st.markdown('<div class="css-card">', unsafe_allow_html=True)
         
-        # Phần hướng dẫn & File mẫu (Gộp gọn)
-        with st.expander("📋 Quy định & File mẫu", expanded=True):
-            st.markdown("""
-            * **Câu hỏi:** `Câu 1`, `Câu 2`...
-            * **Đáp án:** A. B. C. D. (Tô đỏ/Gạch chân đáp án đúng).
-            * **Tự luận:** `ĐS: kết quả` (Tô đỏ).
-            """)
-            sample_url = "https://drive.google.com/file/d/1_2zhqxwoMQ-AINMfCqy6QbZyGU4Skg3n/view?usp=sharing"
-            st.markdown(f'<a href="{sample_url}" target="_blank" class="download-btn">📥 Tải File Word Mẫu</a>', unsafe_allow_html=True)
+        # HƯỚNG DẪN (Full Style như hình)
+        sample_url = "https://drive.google.com/file/d/1_2zhqxwoMQ-AINMfCqy6QbZyGU4Skg3n/view?usp=sharing"
+        st.markdown(f"""
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div style="font-weight:bold; color:#00796b;">📝 Hướng dẫn & Cấu trúc</div>
+            <a href="{sample_url}" target="_blank" class="btn-sample">📥 Tải mẫu</a>
+        </div>
+        
+        <div class="instruction-box">
+            <div class="instruction-part">PHẦN 1: <span style="font-weight:400; color:#333;">Trắc nghiệm (A. B. C. D.)</span></div>
+            <div class="instruction-part">PHẦN 2: <span style="font-weight:400; color:#333;">Đúng/Sai (a) b) c) d))</span></div>
+            <div class="instruction-part">PHẦN 3: <span style="font-weight:400; color:#333;">Trả lời ngắn</span></div>
+            
+            <div class="warning-box">
+                <div style="font-weight:bold; margin-bottom:5px;">⚠️ Lưu ý quan trọng:</div>
+                <div>• Mỗi câu hỏi bắt đầu bằng <span class="highlight-code">Câu 1.</span>, <span class="highlight-code">Câu 2.</span></div>
+                <div>• Đáp án trắc nghiệm: <span class="highlight-code">A.</span> <span class="highlight-code">B.</span> (viết hoa + dấu chấm)</div>
+                <div>• Đáp án đúng/sai: <span class="highlight-code">a)</span> <span class="highlight-code">b)</span> (viết thường + dấu ngoặc)</div>
+                <div>• <b>Đáp án đúng:</b> Phải <span style="text-decoration:underline;">gạch chân</span> hoặc <span class="highlight-red">tô màu đỏ</span>.</div>
+                <div style="margin-top:5px; border-top:1px dashed #ccc; padding-top:5px;">
+                    • <b>Đáp án Phần 3 (Mới):</b> Ghi <span class="highlight-red">ĐS: Kết quả</span> và tô màu đỏ.
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # BƯỚC 2: Chọn kiểu trộn
+        st.markdown("""
+        <div class="step-container">
+            <div class="step-badge">2</div>
+            <div class="step-title">Chọn kiểu trộn</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Radio button ngang
+        shuffle_mode = st.radio(
+            "Chọn kiểu trộn",
+            options=["auto", "mcq", "tf"],
+            format_func=lambda x: {
+                "auto": "🔄 Tự động (Theo PHẦN 1,2,3)", 
+                "mcq": "📝 Toàn bộ Trắc nghiệm", 
+                "tf": "✅ Toàn bộ Đúng/Sai"
+            }[x],
+            label_visibility="collapsed"
+        )
         
         st.write("") # Spacer
-        st.markdown('<div class="card-title">⚙️ BƯỚC 2: CẤU HÌNH & TRỘN</div>', unsafe_allow_html=True)
+
+        # BƯỚC 3: Cấu hình số lượng
+        st.markdown("""
+        <div class="step-container">
+            <div class="step-badge">3</div>
+            <div class="step-title">Số mã đề cần tạo</div>
+        </div>
+        """, unsafe_allow_html=True)
         
-        c1, c2 = st.columns(2)
+        c1, c2 = st.columns([1, 2])
         with c1:
-            num_versions = st.number_input("Số lượng đề", 1, 50, 4)
+            num_versions = st.number_input("Số lượng", 1, 50, 4, label_visibility="collapsed")
         with c2:
-            filename_prefix = st.text_input("Mã đề", "KiemTra")
+            st.caption("● 1 mã → File Word  |  ● Nhiều mã → File ZIP")
             
-        auto_fix = st.checkbox("Sửa lỗi hình ảnh trôi nổi", value=True)
-        
         st.write("")
-        if st.button("🚀 TRỘN ĐỀ & TẢI XUỐNG"):
-            if st.session_state.get('file_valid'):
+        auto_fix = st.checkbox("Sửa lỗi hình ảnh", value=True)
+
+        # NÚT XỬ LÝ
+        if st.button("🚀 Trộn đề & Tải xuống"):
+            if st.session_state.get('is_valid') and 'file_bytes' in st.session_state:
                 with st.spinner("Đang xử lý..."):
                     try:
                         z_data, e_data = process_document_final(
                             st.session_state['file_bytes'], 
                             num_versions, 
-                            filename_prefix, 
-                            auto_fix
+                            "KiemTra", 
+                            auto_fix,
+                            shuffle_mode
                         )
-                        st.success("🎉 Xử lý thành công!")
-                        
-                        col_d1, col_d2 = st.columns(2)
-                        with col_d1:
-                            st.download_button("📥 Tải Đề (ZIP)", z_data, f"{filename_prefix}_Mix.zip", "application/zip", use_container_width=True)
-                        with col_d2:
-                            st.download_button("📊 Tải Đáp Án", e_data, f"{filename_prefix}_Key.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
+                        st.success("Thành công!")
+                        d1, d2 = st.columns(2)
+                        with d1:
+                            st.download_button("📥 Tải Đề (ZIP)", z_data, "De_Tron.zip", "application/zip", use_container_width=True)
+                        with d2:
+                            st.download_button("📊 Đáp án (Excel)", e_data, "Dap_An.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
                     except Exception as e:
                         st.error(f"Lỗi: {e}")
             else:
-                st.error("Vui lòng tải lên file hợp lệ ở Cột Trái trước!")
-                
-        st.markdown('</div>', unsafe_allow_html=True) # End Card Right
+                st.error("Vui lòng tải file hợp lệ ở Bước 1")
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
     # Footer
-    st.markdown('<div style="text-align:center; color: #7f8c8d; margin-top: 30px;">© 2025 Phan Trường Duy - THPT Minh Đức</div>', unsafe_allow_html=True)
+    st.markdown('<div style="text-align:center; color: #aaa; margin-top:20px; font-size:0.8rem;">© 2025 Phan Trường Duy - THPT Minh Đức</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
