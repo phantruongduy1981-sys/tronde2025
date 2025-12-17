@@ -1,5 +1,5 @@
 """
-Trộn Đề Word Online - AIOMT Premium (Final Fix HTML & Layout)
+Trộn Đề Word Online - AIOMT Premium (Updated Sample Link)
 Author: Phan Trường Duy - THPT Minh Đức
 """
 
@@ -450,11 +450,11 @@ def main():
 
     # --- CỘT TRÁI ---
     with col_left:
-        # 1.1 HƯỚNG DẪN & CẤU TRÚC (ĐÃ SỬA LỖI INDENTATION)
+        # 1.1 HƯỚNG DẪN & CẤU TRÚC (ĐÃ CẬP NHẬT LINK MỚI)
         with st.expander("📄 Hướng dẫn & Cấu trúc (Bấm để xem)", expanded=False):
             st.markdown("""
 <div style="text-align: right; margin-bottom: 10px;">
-<a href="https://drive.google.com/file/d/1_2zhqxwoMQ-AINMfCqy6QbZyGU4Skg3n/view?usp=sharing" target="_blank" 
+<a href="https://docs.google.com/document/d/1pC6rw04BSnNQnWRAn9an-1HyWQEHDDQB/edit?usp=sharing&ouid=112824050529887271694&rtpof=true&sd=true" target="_blank" 
 style="background-color:#009688; color:white; padding:5px 10px; border-radius:5px; text-decoration:none; font-weight:bold;">
 📥 Tải File Mẫu
 </a>
