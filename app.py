@@ -1,5 +1,5 @@
 """
-Trộn Đề Word Online - AIOMT Premium (Final Stable - Fixed Bad Magic Number)
+Trộn Đề Word Online - AIOMT Premium (Fixed Bad Magic Number - Final)
 Author: Phan Trường Duy - THPT Minh Đức
 """
 
@@ -338,6 +338,7 @@ def find_part_index(blocks, p_num):
     return -1
 
 def process_document_final(file_bytes, num_versions, filename_prefix, auto_fix_img, shuffle_mode="auto"):
+    # FIX: Tạo BytesIO mới từ bytes gốc mỗi lần xử lý
     input_buffer = io.BytesIO(file_bytes)
     zip_in = zipfile.ZipFile(input_buffer, 'r')
     doc_xml = zip_in.read("word/document.xml").decode('utf-8')
@@ -447,7 +448,7 @@ def main():
 
     # --- CỘT TRÁI ---
     with col_left:
-        # 1.1 HƯỚNG DẪN & CẤU TRÚC (Code HTML chuẩn)
+        # 1.1 HƯỚNG DẪN & CẤU TRÚC
         with st.expander("📄 Hướng dẫn & Cấu trúc (Bấm để xem)", expanded=False):
             st.markdown("""
 <div style="text-align: right; margin-bottom: 10px;">
@@ -490,13 +491,13 @@ style="background-color:#009688; color:white; padding:5px 10px; border-radius:5p
         uploaded_file = st.file_uploader("Kéo thả file vào đây", type=["docx"], label_visibility="collapsed")
         
         if uploaded_file:
-            # FIX LỖI "Bad magic number": Reset con trỏ file trước khi đọc
-            uploaded_file.seek(0)
-            st.session_state['file_bytes'] = uploaded_file.read()
+            # FIX QUAN TRỌNG: Dùng getvalue() để lấy dữ liệu an toàn
+            st.session_state['file_bytes'] = uploaded_file.getvalue()
             
             # Button kiểm tra
             if st.button("🔍 Kiểm tra cấu trúc & Lỗi"):
                 try:
+                    # Tạo stream từ bytes đã lưu
                     input_buffer = io.BytesIO(st.session_state['file_bytes'])
                     zip_in = zipfile.ZipFile(input_buffer, 'r')
                     doc_xml = zip_in.read("word/document.xml").decode('utf-8')
@@ -561,21 +562,26 @@ style="background-color:#009688; color:white; padding:5px 10px; border-radius:5p
         
         # NÚT XỬ LÝ
         if st.button("🚀 Trộn đề & Tải xuống"):
-            if 'file_bytes' in st.session_state and st.session_state.get('is_valid', True):
-                with st.spinner("Đang xử lý..."):
-                    do_fix = st.session_state.get('auto_fix_img', True)
-                    try:
-                        z_data, e_data = process_document_final(
-                            st.session_state['file_bytes'], num_mix, "KiemTra", do_fix, mode
-                        )
-                        st.success("Thành công!")
-                        d1, d2 = st.columns(2)
-                        with d1:
-                            st.download_button("📥 Tải Đề (ZIP)", z_data, "De_Tron.zip", "application/zip", use_container_width=True)
-                        with d2:
-                            st.download_button("📊 Đáp án (Excel)", e_data, "Dap_An.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
-                    except Exception as e:
-                        st.error(f"Lỗi: {e}")
+            # Kiểm tra xem đã có file trong session chưa
+            if 'file_bytes' in st.session_state and st.session_state.get('file_bytes'):
+                if st.session_state.get('is_valid', True):
+                    with st.spinner("Đang xử lý..."):
+                        do_fix = st.session_state.get('auto_fix_img', True)
+                        try:
+                            # Truyền bytes từ session vào hàm xử lý
+                            z_data, e_data = process_document_final(
+                                st.session_state['file_bytes'], num_mix, "KiemTra", do_fix, mode
+                            )
+                            st.success("Thành công!")
+                            d1, d2 = st.columns(2)
+                            with d1:
+                                st.download_button("📥 Tải Đề (ZIP)", z_data, "De_Tron.zip", "application/zip", use_container_width=True)
+                            with d2:
+                                st.download_button("📊 Đáp án (Excel)", e_data, "Dap_An.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
+                        except Exception as e:
+                            st.error(f"Lỗi xử lý: {e}")
+                else:
+                    st.error("File có lỗi cấu trúc. Vui lòng sửa và kiểm tra lại.")
             else:
                 st.warning("Vui lòng tải file & kiểm tra ở Bước 1 trước.")
 
