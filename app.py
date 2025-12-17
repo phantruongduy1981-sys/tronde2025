@@ -449,7 +449,7 @@ def main():
 
     # --- CỘT TRÁI ---
     with col_left:
-        # HƯỚNG DẪN & CẤU TRÚC (Code HTML không thụt dòng để tránh lỗi hiển thị)
+     # 1.1 HƯỚNG DẪN & CẤU TRÚC (Đã sửa lỗi hiển thị HTML)
         with st.expander("📄 Hướng dẫn & Cấu trúc (Bấm để xem)", expanded=False):
             st.markdown("""
 <div style="text-align: right; margin-bottom: 10px;">
@@ -473,17 +473,19 @@ def main():
     
     <div class="warning-box">
         <div style="font-weight:bold; color:#e65100; margin-bottom:5px;">⚠️ Lưu ý quan trọng:</div>
-        <li>Mỗi câu hỏi bắt đầu bằng <span class="code-tag">Câu 1.</span>, <span class="code-tag">Câu 2.</span> ...</li>
-        <li>Phương án trắc nghiệm: <span class="code-tag">A.</span> <span class="code-tag">B.</span> <span class="code-tag">C.</span> <span class="code-tag">D.</span></li>
-        <li>Phương án đúng/sai: <span class="code-tag">a)</span> <span class="code-tag">b)</span> <span class="code-tag">c)</span> <span class="code-tag">d)</span></li>
-        <li>Đáp án đúng có thể <span style="text-decoration:underline;">gạch chân</span> hoặc <span style="color:blue; font-weight:bold;">tô màu</span>.</li>
-        <li style="margin-top:5px; border-top:1px dashed #ccc; padding-top:5px;">
-            <b>Đáp án Phần 3 (Mới):</b> Ghi <span style="color:red; font-weight:bold;">ĐS: Kết quả</span> và tô đỏ.
-        </li>
+        <ul style="margin-bottom: 0; padding-left: 20px;">
+            <li>Mỗi câu hỏi bắt đầu bằng <span class="code-tag">Câu 1.</span>, <span class="code-tag">Câu 2.</span> ...</li>
+            <li>Phương án trắc nghiệm: <span class="code-tag">A.</span> <span class="code-tag">B.</span> <span class="code-tag">C.</span> <span class="code-tag">D.</span></li>
+            <li>Phương án đúng/sai: <span class="code-tag">a)</span> <span class="code-tag">b)</span> <span class="code-tag">c)</span> <span class="code-tag">d)</span></li>
+            <li>Đáp án đúng có thể <span style="text-decoration:underline;">gạch chân</span> hoặc <span style="color:blue; font-weight:bold;">tô màu</span>.</li>
+            <li style="margin-top:5px; border-top:1px dashed #ccc; padding-top:5px;">
+                <b>Đáp án Phần 3 (Mới):</b> Ghi <span style="color:red; font-weight:bold;">ĐS: Kết quả</span> và tô đỏ.
+            </li>
+        </ul>
     </div>
 </div>
 """, unsafe_allow_html=True)
-        
+                   
         # BƯỚC 1: UPLOAD & CHECK
         st.markdown('<div class="step-label"><div class="step-badge">1</div>Chọn file đề Word (*.docx)</div>', unsafe_allow_html=True)
         
