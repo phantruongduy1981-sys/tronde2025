@@ -1,5 +1,5 @@
 """
-Trộn Đề Word Online - AIOMT Premium (Fixed Version)
+Trộn Đề Word Online - AIOMT Premium (Final Fixed Version)
 Author: Phan Trường Duy - THPT Minh Đức
 """
 
@@ -10,7 +10,6 @@ import zipfile
 import io
 import pandas as pd
 from xml.dom import minidom
-import sys
 
 # ==================== CẤU HÌNH TRANG ====================
 
@@ -433,17 +432,22 @@ def validate_document(blocks):
     return errors, warnings
 
 def process_document_final(file_bytes, num_versions, filename_prefix, auto_fix_img, shuffle_mode="auto"):
-    # --- [FIXED] TẠO BYTES MỚI VÀ SEEK(0) ĐỂ TRÁNH BAD MAGIC NUMBER ---
+    # ========================================================
+    # FIX LỖI "BAD MAGIC NUMBER" Ở ĐÂY
+    # ========================================================
     input_buffer = io.BytesIO(file_bytes)
-    input_buffer.seek(0) # Quan trọng: Reset con trỏ về đầu
+    input_buffer.seek(0) # <--- QUAN TRỌNG: Đưa con trỏ về đầu file
     
     if not zipfile.is_zipfile(input_buffer): 
-        raise Exception("File không hợp lệ hoặc bị lỗi định dạng.")
+        # Thử seek lại lần nữa cho chắc
+        input_buffer.seek(0)
+        if not zipfile.is_zipfile(input_buffer):
+            raise Exception("File không hợp lệ hoặc bị lỗi định dạng.")
     
-    input_buffer.seek(0) # Đảm bảo reset lại trước khi ZipFile đọc
-    # ------------------------------------------------------------------
-
+    input_buffer.seek(0) # Reset lần cuối trước khi đọc thật
     zip_in = zipfile.ZipFile(input_buffer, 'r')
+    # ========================================================
+
     doc_xml = zip_in.read("word/document.xml").decode('utf-8')
     if auto_fix_img: doc_xml = fix_floating_images_in_xml(doc_xml)
     
@@ -608,26 +612,25 @@ style="background-color:#009688; color:white; padding:5px 10px; border-radius:5p
         st.markdown('<div class="step-label"><div class="step-badge">1</div>Chọn file đề Word (*.docx)</div>', unsafe_allow_html=True)
         uploaded_file = st.file_uploader("Kéo thả file vào đây", type=["docx"], label_visibility="collapsed")
         
-        # --- [FIXED] QUẢN LÝ FILE UPLOAD ĐỂ TRÁNH LỖI READ() ---
+        # --- FIX: CHỈ ĐỌC FILE MỘT LẦN VÀ LƯU VÀO SESSION ---
         if uploaded_file is not None:
-            # Tạo ID file để kiểm tra xem có phải file mới không
+            # Tạo key định danh file
             file_id = f"{uploaded_file.name}_{uploaded_file.size}"
             
-            # Chỉ đọc lại nếu là file mới (hoặc session chưa có)
+            # Nếu là file mới thì đọc, nếu file cũ thì giữ nguyên session
             if 'current_file_id' not in st.session_state or st.session_state.get('current_file_id') != file_id:
                 uploaded_file.seek(0)
                 st.session_state['file_bytes'] = uploaded_file.read()
                 st.session_state['current_file_id'] = file_id
-                st.session_state['is_valid'] = True
+                st.session_state['is_valid'] = True # Reset trạng thái valid
             
-            # Từ giờ dùng file_bytes trong session thay vì uploaded_file trực tiếp
             st.success(f"✅ Đã tải lên: {uploaded_file.name}")
             
             if st.button("🔍 Kiểm tra cấu trúc & Lỗi"):
                 try:
-                    # Đọc từ Session State
+                    # Lấy từ bộ nhớ thay vì đọc lại uploaded_file
                     input_buffer = io.BytesIO(st.session_state['file_bytes'])
-                    input_buffer.seek(0) # Đảm bảo con trỏ ở đầu
+                    input_buffer.seek(0) # Reset con trỏ
 
                     zip_in = zipfile.ZipFile(input_buffer, 'r')
                     doc_xml = zip_in.read("word/document.xml").decode('utf-8')
