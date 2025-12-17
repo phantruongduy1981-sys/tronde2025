@@ -1,5 +1,5 @@
 """
-Trộn Đề Word Online - AIOMT Premium (Updated Sample Link)
+Trộn Đề Word Online - AIOMT Premium (Final Stable - Fixed Bad Magic Number)
 Author: Phan Trường Duy - THPT Minh Đức
 """
 
@@ -221,7 +221,6 @@ def validate_document(blocks):
     questions = []
     current_q = []
     q_num_map = {}
-    
     for block in blocks:
         text = get_pure_text(block)
         m = re.match(r'^Câu\s*(\d+)', text, re.IGNORECASE)
@@ -232,7 +231,6 @@ def validate_document(blocks):
         else:
             if current_q: current_q.append(block)
     if current_q: questions.append(current_q)
-    
     for idx, q_blocks in enumerate(questions):
         q_label = f"Câu {q_num_map.get(idx, 'Unknown')}"
         for b in q_blocks:
@@ -250,7 +248,6 @@ def validate_document(blocks):
                 for r in runs:
                     if is_answer_marked(r): has_red_ds = True; break
             if not has_red_ds: errors.append(f"❌ {q_label}: 'ĐS' chưa tô đỏ")
-            
     return errors, warnings
 
 def update_question_label(paragraph, new_number):
@@ -450,7 +447,7 @@ def main():
 
     # --- CỘT TRÁI ---
     with col_left:
-        # 1.1 HƯỚNG DẪN & CẤU TRÚC (ĐÃ CẬP NHẬT LINK MỚI)
+        # 1.1 HƯỚNG DẪN & CẤU TRÚC (Code HTML chuẩn)
         with st.expander("📄 Hướng dẫn & Cấu trúc (Bấm để xem)", expanded=False):
             st.markdown("""
 <div style="text-align: right; margin-bottom: 10px;">
@@ -493,7 +490,9 @@ style="background-color:#009688; color:white; padding:5px 10px; border-radius:5p
         uploaded_file = st.file_uploader("Kéo thả file vào đây", type=["docx"], label_visibility="collapsed")
         
         if uploaded_file:
-            st.session_state['file_bytes'] = uploaded_file.getvalue()
+            # FIX LỖI "Bad magic number": Reset con trỏ file trước khi đọc
+            uploaded_file.seek(0)
+            st.session_state['file_bytes'] = uploaded_file.read()
             
             # Button kiểm tra
             if st.button("🔍 Kiểm tra cấu trúc & Lỗi"):
@@ -523,8 +522,8 @@ style="background-color:#009688; color:white; padding:5px 10px; border-radius:5p
                             st.warning(f"⚠️ {len(warnings)} hình ảnh bị trôi (Floating).")
                             st.info("💡 Hệ thống sẽ TỰ ĐỘNG SỬA khi bấm Trộn.")
                             st.session_state['auto_fix_img'] = True
-                except:
-                    st.error("Lỗi đọc file. File bị hỏng.")
+                except Exception as e:
+                    st.error(f"Lỗi đọc file: {str(e)}")
 
     # --- CỘT PHẢI ---
     with col_right:
@@ -540,7 +539,7 @@ style="background-color:#009688; color:white; padding:5px 10px; border-radius:5p
                 "tf": "✅ Đúng/Sai (Toàn bộ a)b)c)d))"
             }[x],
             label_visibility="collapsed",
-            horizontal=False # Xếp dọc mỗi item 1 dòng
+            horizontal=False 
         )
         
         st.write("") # Spacer
