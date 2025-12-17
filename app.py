@@ -1,5 +1,5 @@
 """
-Trộn Đề Word Online - AIOMT Premium (Fixed Bad Magic Number - Final)
+Trộn Đề Word Online - AIOMT Premium (Final Stable - SectPr Fix)
 Author: Phan Trường Duy - THPT Minh Đức
 """
 
@@ -24,7 +24,7 @@ st.set_page_config(
 # ==================== CSS CUSTOM DESIGN ====================
 st.markdown("""
 <style>
-    /* 1. HEADER */
+    /* 1. HEADER SIÊU LỚN */
     .main-header {
         text-align: center;
         padding: 2rem 0;
@@ -158,7 +158,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ==================== CORE LOGIC (GIỮ NGUYÊN) ====================
+# ==================== CORE LOGIC (XỬ LÝ XML) ====================
 W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
 def get_pure_text(block):
@@ -221,6 +221,7 @@ def validate_document(blocks):
     questions = []
     current_q = []
     q_num_map = {}
+    
     for block in blocks:
         text = get_pure_text(block)
         m = re.match(r'^Câu\s*(\d+)', text, re.IGNORECASE)
@@ -231,6 +232,7 @@ def validate_document(blocks):
         else:
             if current_q: current_q.append(block)
     if current_q: questions.append(current_q)
+    
     for idx, q_blocks in enumerate(questions):
         q_label = f"Câu {q_num_map.get(idx, 'Unknown')}"
         for b in q_blocks:
@@ -248,6 +250,7 @@ def validate_document(blocks):
                 for r in runs:
                     if is_answer_marked(r): has_red_ds = True; break
             if not has_red_ds: errors.append(f"❌ {q_label}: 'ĐS' chưa tô đỏ")
+            
     return errors, warnings
 
 def update_question_label(paragraph, new_number):
@@ -338,7 +341,7 @@ def find_part_index(blocks, p_num):
     return -1
 
 def process_document_final(file_bytes, num_versions, filename_prefix, auto_fix_img, shuffle_mode="auto"):
-    # FIX: Tạo BytesIO mới từ bytes gốc mỗi lần xử lý
+    # TẠO BẢN SAO BYTESIO ĐỂ TRÁNH LỖI BAD MAGIC NUMBER
     input_buffer = io.BytesIO(file_bytes)
     zip_in = zipfile.ZipFile(input_buffer, 'r')
     doc_xml = zip_in.read("word/document.xml").decode('utf-8')
@@ -353,6 +356,12 @@ def process_document_final(file_bytes, num_versions, filename_prefix, auto_fix_i
             v_name = f"{101 + i}"
             dom_v = minidom.parseString(doc_xml)
             body_v = dom_v.getElementsByTagNameNS(W_NS, "body")[0]
+            
+            # LƯU LẠI THẺ sectPr (ĐỊNH DẠNG TRANG) NẾU CÓ ĐỂ TRÁNH LỖI FILE WORD HỎNG
+            sectPr = None
+            if body_v.lastChild and body_v.lastChild.localName == 'sectPr':
+                sectPr = body_v.lastChild.cloneNode(True)
+            
             blocks_v = [n for n in body_v.childNodes if n.nodeType == n.ELEMENT_NODE and n.localName in ["p", "tbl"]]
             
             parts = {"intro": [], "p1": [], "p2": [], "p3": []}
@@ -414,8 +423,14 @@ def process_document_final(file_bytes, num_versions, filename_prefix, auto_fix_i
                     final_layout.extend(q)
                     if val: ans_key[f"Câu {g_idx}"] = val
                     g_idx += 1
+            
+            # XÓA BODY CŨ VÀ TẠO BODY MỚI
             while body_v.hasChildNodes(): body_v.removeChild(body_v.firstChild)
             for b in final_layout: body_v.appendChild(b)
+            
+            # TRẢ LẠI sectPr VÀO CUỐI CÙNG (QUAN TRỌNG)
+            if sectPr: body_v.appendChild(sectPr)
+            
             ver_io = io.BytesIO()
             with zipfile.ZipFile(ver_io, 'w', zipfile.ZIP_DEFLATED) as z_ver:
                 for item in zip_in.infolist():
@@ -423,6 +438,7 @@ def process_document_final(file_bytes, num_versions, filename_prefix, auto_fix_i
                     else: z_ver.writestr(item, zip_in.read(item.filename))
             zip_final.writestr(f"{filename_prefix}_{v_name}.docx", ver_io.getvalue())
             all_keys.append(ans_key)
+            
     df = pd.DataFrame(all_keys)
     cols = list(df.columns)
     if "Mã đề" in cols: cols.remove("Mã đề")
@@ -490,14 +506,16 @@ style="background-color:#009688; color:white; padding:5px 10px; border-radius:5p
         
         uploaded_file = st.file_uploader("Kéo thả file vào đây", type=["docx"], label_visibility="collapsed")
         
-        if uploaded_file:
-            # FIX QUAN TRỌNG: Dùng getvalue() để lấy dữ liệu an toàn
+        # LOGIC LƯU FILE VÀO SESSION ĐỂ KHÔNG BỊ MẤT KHI RERUN
+        if uploaded_file is not None:
+            # Lưu file vào session_state ngay lập tức
             st.session_state['file_bytes'] = uploaded_file.getvalue()
+            st.session_state['file_name'] = uploaded_file.name
             
             # Button kiểm tra
             if st.button("🔍 Kiểm tra cấu trúc & Lỗi"):
                 try:
-                    # Tạo stream từ bytes đã lưu
+                    # Đọc từ Session State
                     input_buffer = io.BytesIO(st.session_state['file_bytes'])
                     zip_in = zipfile.ZipFile(input_buffer, 'r')
                     doc_xml = zip_in.read("word/document.xml").decode('utf-8')
@@ -563,7 +581,7 @@ style="background-color:#009688; color:white; padding:5px 10px; border-radius:5p
         # NÚT XỬ LÝ
         if st.button("🚀 Trộn đề & Tải xuống"):
             # Kiểm tra xem đã có file trong session chưa
-            if 'file_bytes' in st.session_state and st.session_state.get('file_bytes'):
+            if 'file_bytes' in st.session_state:
                 if st.session_state.get('is_valid', True):
                     with st.spinner("Đang xử lý..."):
                         do_fix = st.session_state.get('auto_fix_img', True)
