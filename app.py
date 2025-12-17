@@ -1,5 +1,5 @@
 """
-Trộn Đề Word Online - AIOMT Premium (Final Fix Bad Magic Number)
+Trộn Đề Word Online - AIOMT Premium (Final V5 - Smart Color Detection)
 Author: Phan Trường Duy - THPT Minh Đức
 """
 
@@ -21,9 +21,10 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ==================== CSS GIAO DIỆN (ĐÃ TỐI ƯU) ====================
+# ==================== CSS CUSTOM DESIGN ====================
 st.markdown("""
 <style>
+    /* 1. HEADER */
     .main-header {
         text-align: center;
         padding: 1.5rem 0;
@@ -36,17 +37,23 @@ st.markdown("""
     .main-header h1 {
         font-family: 'Arial', sans-serif;
         font-weight: 800;
-        font-size: 2.5rem;
+        font-size: 3rem !important;
         text-transform: uppercase;
         margin: 0;
+        line-height: 1.1;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
     .main-header p {
-        font-size: 1rem;
+        font-family: 'Arial', sans-serif;
+        font-size: 1.1rem;
         margin-top: 5px;
+        margin-bottom: 0;
         opacity: 0.9;
-        letter-spacing: 1px;
+        font-weight: 500;
+        letter-spacing: 2px;
     }
+
+    /* 2. STYLE CHO THẺ (CARD) */
     .step-label {
         font-size: 1.1rem;
         font-weight: 700;
@@ -68,6 +75,8 @@ st.markdown("""
         font-size: 0.9rem;
         font-weight: bold;
     }
+
+    /* 3. KHUNG HƯỚNG DẪN */
     .instruction-card {
         background-color: #e0f2f1;
         border-radius: 10px;
@@ -75,6 +84,12 @@ st.markdown("""
         color: #004d40;
         font-size: 0.9rem;
         border: 1px solid #b2dfdb;
+    }
+    .part-title {
+        font-weight: bold;
+        color: #00796b;
+        display: inline-block;
+        width: 70px;
     }
     .warning-box {
         background-color: #fff8e1;
@@ -93,6 +108,8 @@ st.markdown("""
         color: #d84315;
         font-weight: bold;
     }
+
+    /* 4. CUSTOM RADIO BUTTONS */
     div[role="radiogroup"] {
         display: flex;
         flex-direction: column; 
@@ -104,9 +121,19 @@ st.markdown("""
         border: 1px solid #cfd8dc;
         border-radius: 8px;
         padding: 12px;
+        display: flex;
+        align-items: center;
+        transition: all 0.2s;
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         margin-bottom: 0px !important;
     }
+    div[role="radiogroup"] > label:hover {
+        border-color: #009688;
+        background-color: #f0fdfa;
+        transform: translateX(5px);
+    }
+    
+    /* 5. UPLOAD BOX */
     .stFileUploader {
         border: 2px dashed #009688;
         border-radius: 10px;
@@ -114,6 +141,8 @@ st.markdown("""
         background-color: white;
         text-align: center;
     }
+
+    /* 6. BUTTON */
     .stButton > button {
         background: #009688;
         color: white;
@@ -128,12 +157,14 @@ st.markdown("""
     }
     .stButton > button:hover {
         background: #00796b;
+        transform: translateY(-2px);
     }
+
     .block-container { padding-top: 1rem !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# ==================== CORE LOGIC ====================
+# ==================== CORE LOGIC (ĐÃ NÂNG CẤP) ====================
 W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
 def get_pure_text(block):
@@ -145,17 +176,38 @@ def get_pure_text(block):
     return "".join(texts).strip()
 
 def is_answer_marked(node):
+    """
+    Kiểm tra đánh dấu đáp án:
+    1. Tô màu chữ (Bất kỳ màu gì khác Đen/Auto).
+    2. Highlight (Bút dạ quang).
+    3. Gạch chân.
+    """
     rPr_list = node.getElementsByTagNameNS(W_NS, "rPr")
     if not rPr_list: return False
     rPr = rPr_list[0]
+    
+    # 1. Check màu chữ (Mở rộng chấp nhận mọi màu khác đen)
     color_list = rPr.getElementsByTagNameNS(W_NS, "color")
     if color_list:
         val = color_list[0].getAttributeNS(W_NS, "val")
-        if val in ["red", "FF0000", "C00000"]: return True
+        # Các giá trị màu đen hoặc tự động thường gặp
+        black_vals = ["000000", "auto", "black"]
+        # Nếu có mã màu và không phải đen/auto -> Coi là đáp án
+        if val and val not in black_vals: 
+            return True
+            
+    # 2. Check Highlight (Bút dạ quang) - Bổ sung mới
+    highlight_list = rPr.getElementsByTagNameNS(W_NS, "highlight")
+    if highlight_list:
+        val = highlight_list[0].getAttributeNS(W_NS, "val")
+        if val and val != "none": return True
+            
+    # 3. Check Gạch chân
     u_list = rPr.getElementsByTagNameNS(W_NS, "u")
     if u_list:
         val = u_list[0].getAttributeNS(W_NS, "val")
         if val and val != "none": return True
+        
     return False
 
 def get_text_with_formatting(block):
@@ -178,12 +230,14 @@ def style_run_blue_bold(run):
     else:
         rPr = doc.createElementNS(W_NS, "w:rPr")
         run.insertBefore(rPr, run.firstChild)
+    
     color_list = rPr.getElementsByTagNameNS(W_NS, "color")
     if color_list: color_el = color_list[0]
     else:
         color_el = doc.createElementNS(W_NS, "w:color")
         rPr.appendChild(color_el)
-    color_el.setAttributeNS(W_NS, "w:val", "0000FF")
+    color_el.setAttributeNS(W_NS, "w:val", "0000FF") # Blue
+    
     b_list = rPr.getElementsByTagNameNS(W_NS, "b")
     if not b_list:
         b_el = doc.createElementNS(W_NS, "w:b")
@@ -242,7 +296,8 @@ def parse_questions_in_range(blocks, start, end):
     questions = []
     i = 0
     while i < len(part_blocks):
-        if re.match(r'^Câu\s*\d+\b', get_pure_text(part_blocks[i]), re.IGNORECASE): break
+        text = get_pure_text(part_blocks[i])
+        if re.match(r'^Câu\s*\d+\b', text, re.IGNORECASE): break
         intro.append(part_blocks[i])
         i += 1
     while i < len(part_blocks):
@@ -270,7 +325,9 @@ def process_mcq_question_with_key(question_blocks):
     indices = []
     for i, block in enumerate(question_blocks):
         if re.match(r'^\s*[A-D][\.\)]', get_pure_text(block), re.IGNORECASE): indices.append(i)
+    
     if len(indices) < 2: return question_blocks, ""
+
     options = [question_blocks[idx] for idx in indices]
     original_correct_idx = -1
     for idx, opt in enumerate(options):
@@ -278,36 +335,53 @@ def process_mcq_question_with_key(question_blocks):
         if is_correct:
             original_correct_idx = idx
             break
+            
     perm = list(range(len(options)))
     random.shuffle(perm)
     shuffled_options = [options[i] for i in perm]
+    
     new_correct_char = ""
     letters = ["A", "B", "C", "D", "E", "F"]
     if original_correct_idx != -1 and original_correct_idx in perm:
         new_pos = perm.index(original_correct_idx)
         new_correct_char = letters[new_pos] if new_pos < len(letters) else ""
+
     for idx, block in enumerate(shuffled_options):
         letter = letters[idx] if idx < len(letters) else "Z"
         update_mcq_label(block, f"{letter}.")
-    min_idx, max_idx = min(indices), max(indices)
-    return question_blocks[:min_idx] + shuffled_options + question_blocks[max_idx+1:], new_correct_char
+
+    min_idx = min(indices)
+    max_idx = max(indices)
+    before = question_blocks[:min_idx]
+    after = question_blocks[max_idx+1:]
+    
+    return before + shuffled_options + after, new_correct_char
 
 def process_tf_question(question_blocks):
     option_indices = {}
     for i, block in enumerate(question_blocks):
         m = re.match(r'^\s*([a-d])\)', get_pure_text(block), re.IGNORECASE)
         if m: option_indices[m.group(1).lower()] = i
+    
     abc_idx = [option_indices.get(k) for k in ["a","b","c"] if option_indices.get(k) is not None]
     if len(abc_idx) < 2: return question_blocks
+    
     abc_nodes = [question_blocks[idx] for idx in abc_idx]
     shuffled_abc = shuffle_array(abc_nodes)
+    
     all_vals = [v for v in option_indices.values() if v is not None]
     min_i, max_i = min(all_vals), max(all_vals)
+    
+    before = question_blocks[:min_i]
+    after = question_blocks[max_i+1:]
+    
     middle = shuffled_abc.copy()
     if "d" in option_indices: middle.append(question_blocks[option_indices["d"]])
+    
     for idx, block in enumerate(middle):
         if idx < 3: update_tf_label(block, f"{['a','b','c'][idx]})")
-    return question_blocks[:min_i] + middle + question_blocks[max_i+1:]
+        
+    return before + middle + after
 
 def extract_part3_answer(blocks):
     full_text = ""
@@ -353,22 +427,32 @@ def check_mcq_options(q_blocks):
 def validate_document(blocks):
     errors = []
     warnings = []
-    intro, questions = parse_questions_in_range(blocks, 0, len(blocks))
-    if not questions:
-        errors.append("❌ Không tìm thấy câu hỏi nào bắt đầu bằng 'Câu 1'.")
-        return errors, warnings
+    full_text = " ".join([get_pure_text(b) for b in blocks])
+    
+    if not re.search(r'Câu\s*1', full_text, re.IGNORECASE):
+        errors.append("❌ Không tìm thấy 'Câu 1'. File phải bắt đầu câu hỏi bằng 'Câu 1.'")
         
+    intro, questions = parse_questions_in_range(blocks, 0, len(blocks))
     for idx, q_blocks in enumerate(questions):
-        q_label = f"Câu {idx + 1}"
+        q_label = f"Câu {idx + 1}" # Đếm theo thứ tự xuất hiện
+        
+        # Lấy số câu thật nếu có
+        q_text = " ".join([get_pure_text(b) for b in q_blocks])
+        m = re.match(r'Câu\s*(\d+)', q_text, re.IGNORECASE)
+        if m: q_label = f"Câu {m.group(1)}"
+
+        # Check ảnh
         for b in q_blocks:
             if b.getElementsByTagName("wp:anchor"):
                 warnings.append(f"⚠️ {q_label} chứa ảnh trôi (Floating).")
                 break
-        q_text = " ".join([get_pure_text(b) for b in q_blocks])
+        
+        # Check P1
         if re.search(r'\bA[\.\)]', q_text) and re.search(r'\bD[\.\)]', q_text):
             missing, has_correct = check_mcq_options(q_blocks)
             if missing: errors.append(f"❌ {q_label}: Thiếu {', '.join(missing)}")
             if not has_correct: errors.append(f"❌ {q_label}: Chưa chọn đáp án")
+        # Check P3 (ĐS)
         elif "ĐS" in q_text or "đs" in q_text:
             has_red_ds = False
             for b in q_blocks:
@@ -376,6 +460,7 @@ def validate_document(blocks):
                 for r in runs:
                     if is_answer_marked(r): has_red_ds = True; break
             if not has_red_ds: errors.append(f"❌ {q_label}: 'ĐS' chưa tô đỏ")
+            
     return errors, warnings
 
 def process_document_final(file_bytes, num_versions, filename_prefix, auto_fix_img, shuffle_mode="auto"):
@@ -407,16 +492,16 @@ def process_document_final(file_bytes, num_versions, filename_prefix, auto_fix_i
                 if p1_i >= 0:
                     parts["intro"] = blocks_v[cur:p1_i+1]
                     cur = p1_i+1
-                    e1 = p2_i if p2_i >= 0 else (p3_i if p3_i >= 0 else len(blocks_v))
-                    parts["p1"] = blocks_v[cur:e1]
-                    cur = e1
+                    end1 = p2_i if p2_i >= 0 else (p3_i if p3_i >= 0 else len(blocks_v))
+                    parts["p1"] = blocks_v[cur:end1]
+                    cur = end1
                 else:
                     parts["p1"] = blocks_v
                     cur = len(blocks_v)
                 if p2_i >= 0:
-                    e2 = p3_i if p3_i >= 0 else len(blocks_v)
-                    parts["p2"] = blocks_v[cur:e2]
-                    cur = e2
+                    end2 = p3_i if p3_i >= 0 else len(blocks_v)
+                    parts["p2"] = blocks_v[cur:end2]
+                    cur = end2
                 if p3_i >= 0: parts["p3"] = blocks_v[cur:]
             elif shuffle_mode == "mcq": parts["p1"] = blocks_v
             elif shuffle_mode == "tf": parts["p2"] = blocks_v
@@ -467,7 +552,7 @@ def process_document_final(file_bytes, num_versions, filename_prefix, auto_fix_i
                     else: z_ver.writestr(item, zip_in.read(item.filename))
             zip_final.writestr(f"{filename_prefix}_{v_name}.docx", ver_io.getvalue())
             all_keys.append(ans_key)
-            
+    
     df = pd.DataFrame(all_keys)
     cols = list(df.columns)
     if "Mã đề" in cols: cols.remove("Mã đề")
@@ -524,18 +609,13 @@ style="background-color:#009688; color:white; padding:5px 10px; border-radius:5p
         uploaded_file = st.file_uploader("Kéo thả file vào đây", type=["docx"], label_visibility="collapsed")
         
         if uploaded_file is not None:
-            # FIX: Lưu file vào Session State ngay khi upload
-            if 'file_id' not in st.session_state or st.session_state['file_id'] != uploaded_file.file_id:
-                uploaded_file.seek(0)
-                st.session_state['file_bytes'] = uploaded_file.read()
-                st.session_state['file_id'] = uploaded_file.file_id
-                st.session_state['file_name'] = uploaded_file.name
-                
-            st.success(f"✅ Đã tải lên: {st.session_state['file_name']}")
+            # FIX: Reset pointer & Save Session
+            uploaded_file.seek(0)
+            st.session_state['file_bytes'] = uploaded_file.read()
+            st.success(f"✅ Đã tải lên: {uploaded_file.name}")
             
             if st.button("🔍 Kiểm tra cấu trúc & Lỗi"):
                 try:
-                    # Đọc từ Session
                     input_buffer = io.BytesIO(st.session_state['file_bytes'])
                     zip_in = zipfile.ZipFile(input_buffer, 'r')
                     doc_xml = zip_in.read("word/document.xml").decode('utf-8')
@@ -557,7 +637,7 @@ style="background-color:#009688; color:white; padding:5px 10px; border-radius:5p
                             st.session_state['is_valid'] = True
                         if warnings:
                             st.warning(f"⚠️ {len(warnings)} hình ảnh bị trôi.")
-                            st.info("💡 Hệ thống sẽ tự động sửa.")
+                            st.info("💡 Hệ thống sẽ tự động sửa khi trộn.")
                             st.session_state['auto_fix_img'] = True
                 except Exception as e:
                     st.error(f"Lỗi đọc file: {str(e)}")
