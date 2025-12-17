@@ -1,5 +1,5 @@
 """
-Trộn Đề Word Online - AIOMT Premium (Final V2 - Fix Seek(0))
+Trộn Đề Word Online - AIOMT Premium (Final V3 - Session State Fix)
 Author: Phan Trường Duy - THPT Minh Đức
 """
 
@@ -338,12 +338,15 @@ def find_part_index(blocks, p_num):
     return -1
 
 def process_document_final(file_bytes, num_versions, filename_prefix, auto_fix_img, shuffle_mode="auto"):
-    # FIX AN TOÀN: Tạo input buffer mới hoàn toàn từ bytes
+    # FIX: Tạo BytesIO mới từ bytes gốc mỗi lần xử lý
+    if not file_bytes:
+        raise Exception("File dữ liệu bị rỗng. Vui lòng tải lại trang.")
+        
     input_buffer = io.BytesIO(file_bytes)
     
-    # Kiểm tra xem file có phải zip hợp lệ không
+    # Kiểm tra xem có phải file zip hợp lệ không
     if not zipfile.is_zipfile(input_buffer):
-        raise ValueError("File không hợp lệ hoặc bị lỗi. Vui lòng tải lại trang và upload lại file.")
+        raise Exception("Định dạng file không hợp lệ hoặc file bị lỗi.")
         
     zip_in = zipfile.ZipFile(input_buffer, 'r')
     doc_xml = zip_in.read("word/document.xml").decode('utf-8')
@@ -463,7 +466,7 @@ def main():
 
     # --- CỘT TRÁI ---
     with col_left:
-        # 1.1 HƯỚNG DẪN & CẤU TRÚC
+        # 1.1 HƯỚNG DẪN
         with st.expander("📄 Hướng dẫn & Cấu trúc (Bấm để xem)", expanded=False):
             st.markdown("""
 <div style="text-align: right; margin-bottom: 10px;">
@@ -500,22 +503,27 @@ style="background-color:#009688; color:white; padding:5px 10px; border-radius:5p
 </div>
 """, unsafe_allow_html=True)
         
-        # BƯỚC 1: UPLOAD & CHECK
+        # BƯỚC 1: UPLOAD
         st.markdown('<div class="step-label"><div class="step-badge">1</div>Chọn file đề Word (*.docx)</div>', unsafe_allow_html=True)
         
         uploaded_file = st.file_uploader("Kéo thả file vào đây", type=["docx"], label_visibility="collapsed")
         
-        # LOGIC LƯU FILE AN TOÀN
+        # --- FIX QUAN TRỌNG: LƯU FILE VÀO SESSION STATE ---
         if uploaded_file is not None:
-            # RESET POINTER & LƯU VÀO SESSION
-            uploaded_file.seek(0) 
-            file_bytes = uploaded_file.read()
-            st.session_state['file_bytes'] = file_bytes
+            # Chỉ đọc file 1 lần và lưu vào session
+            if 'file_id' not in st.session_state or st.session_state['file_id'] != uploaded_file.file_id:
+                st.session_state['file_bytes'] = uploaded_file.getvalue()
+                st.session_state['file_id'] = uploaded_file.file_id
+                st.session_state['file_name'] = uploaded_file.name
+                # Reset trạng thái cũ
+                st.session_state['is_valid'] = False
             
+            st.success(f"✅ Đã tải lên: {st.session_state['file_name']}")
+
             # Button kiểm tra
             if st.button("🔍 Kiểm tra cấu trúc & Lỗi"):
                 try:
-                    # Đọc từ Session
+                    # Luôn đọc từ Session State
                     input_buffer = io.BytesIO(st.session_state['file_bytes'])
                     zip_in = zipfile.ZipFile(input_buffer, 'r')
                     doc_xml = zip_in.read("word/document.xml").decode('utf-8')
@@ -546,7 +554,7 @@ style="background-color:#009688; color:white; padding:5px 10px; border-radius:5p
 
     # --- CỘT PHẢI ---
     with col_right:
-        # BƯỚC 2: KIỂU TRỘN (XẾP DỌC)
+        # BƯỚC 2: KIỂU TRỘN
         st.markdown('<div class="step-label"><div class="step-badge">2</div>Chọn kiểu trộn</div>', unsafe_allow_html=True)
         
         mode = st.radio(
@@ -580,11 +588,13 @@ style="background-color:#009688; color:white; padding:5px 10px; border-radius:5p
         
         # NÚT XỬ LÝ
         if st.button("🚀 Trộn đề & Tải xuống"):
-            if 'file_bytes' in st.session_state:
+            # Kiểm tra xem file byte có tồn tại trong session không
+            if 'file_bytes' in st.session_state and st.session_state['file_bytes']:
                 if st.session_state.get('is_valid', True):
                     with st.spinner("Đang xử lý..."):
                         do_fix = st.session_state.get('auto_fix_img', True)
                         try:
+                            # Truyền file_bytes TỪ SESSION STATE vào hàm xử lý
                             z_data, e_data = process_document_final(
                                 st.session_state['file_bytes'], num_mix, "KiemTra", do_fix, mode
                             )
