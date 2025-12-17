@@ -1,5 +1,5 @@
 """
-Trộn Đề Word Online - AIOMT Premium (Design Match Fix)
+Trộn Đề Word Online - AIOMT Premium (Vertical Radio Cards)
 Author: Phan Trường Duy - THPT Minh Đức
 """
 
@@ -71,9 +71,9 @@ st.markdown("""
         font-size: 0.9rem;
     }
 
-    /* 3. KHUNG HƯỚNG DẪN (Giống hình mẫu) */
+    /* 3. KHUNG HƯỚNG DẪN */
     .instruction-card {
-        background-color: #e0f2f1; /* Xanh nhạt nền */
+        background-color: #e0f2f1;
         border-radius: 10px;
         padding: 20px;
         color: #004d40;
@@ -87,7 +87,7 @@ st.markdown("""
         width: 70px;
     }
     .warning-box {
-        background-color: #fff8e1; /* Vàng nhạt */
+        background-color: #fff8e1;
         border: 1px solid #ffe082;
         border-radius: 8px;
         padding: 15px;
@@ -104,28 +104,29 @@ st.markdown("""
         font-weight: bold;
     }
 
-    /* 4. CUSTOM RADIO BUTTONS (Biến Radio thành Card ngang) */
+    /* 4. CUSTOM RADIO BUTTONS (DẠNG THẺ DỌC) */
     div[role="radiogroup"] {
         display: flex;
-        gap: 10px;
+        flex-direction: column; /* Quan trọng: Xếp dọc */
+        gap: 12px; /* Khoảng cách giữa các thẻ */
         width: 100%;
     }
     div[role="radiogroup"] > label {
-        flex: 1;
+        width: 100%;
         background-color: white;
         border: 1px solid #cfd8dc;
         border-radius: 8px;
-        padding: 10px;
-        text-align: center;
+        padding: 15px; /* Tăng padding cho đẹp */
+        display: flex;
+        align-items: center;
         transition: all 0.2s;
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     div[role="radiogroup"] > label:hover {
         border-color: #009688;
         background-color: #f0fdfa;
+        transform: translateX(5px); /* Hiệu ứng di chuyển nhẹ khi hover */
     }
-    /* Highlight selected option (Streamlit adds data-checked attribute or similar, but simplified via CSS sibling is hard. 
-       We rely on Streamlit's default highlighting but style the container) */
     
     /* 5. UPLOAD BOX */
     .stFileUploader {
@@ -153,7 +154,6 @@ st.markdown("""
         transform: translateY(-2px);
     }
 
-    /* Thu gọn khoảng cách */
     .block-container { padding-top: 1rem !important; }
 </style>
 """, unsafe_allow_html=True)
@@ -253,7 +253,6 @@ def validate_document(blocks):
             
     return errors, warnings
 
-# ... [Các hàm xử lý XML lõi giữ nguyên] ...
 def update_question_label(paragraph, new_number):
     t_nodes = paragraph.getElementsByTagNameNS(W_NS, "t")
     for t in t_nodes:
@@ -451,7 +450,7 @@ def main():
 
     # --- CỘT TRÁI ---
     with col_left:
-        # 1.1 HƯỚNG DẪN & CẤU TRÚC (THU GỌN)
+        # 1.1 HƯỚNG DẪN & CẤU TRÚC
         with st.expander("📄 Hướng dẫn & Cấu trúc (Bấm để xem)", expanded=False):
             st.markdown("""
             <div style="text-align: right; margin-bottom: 10px;">
@@ -527,20 +526,20 @@ def main():
 
     # --- CỘT PHẢI ---
     with col_right:
-        # BƯỚC 2: KIỂU TRỘN (Thiết kế dạng Card ngang)
+        # BƯỚC 2: KIỂU TRỘN (CHỈNH SỬA: XUỐNG DÒNG)
         st.markdown('<div class="step-label"><div class="step-badge">2</div>Chọn kiểu trộn</div>', unsafe_allow_html=True)
         
-        # Dùng radio button với format đặc biệt để giả lập giao diện Card
+        # SỬ DỤNG horizontal=False ĐỂ XẾP DỌC
         mode = st.radio(
             "Mode",
             ["auto", "mcq", "tf"],
             format_func=lambda x: {
-                "auto": "🔄 Tự động\n(Phần 1, 2, 3)",
-                "mcq": "📝 Trắc nghiệm\n(Toàn bộ A.B.C.D)",
-                "tf": "✅ Đúng/Sai\n(Toàn bộ a)b)c)d))"
+                "auto": "🔄 Tự động (Phần 1, 2, 3)",
+                "mcq": "📝 Trắc nghiệm (Toàn bộ A.B.C.D)",
+                "tf": "✅ Đúng/Sai (Toàn bộ a)b)c)d))"
             }[x],
             label_visibility="collapsed",
-            horizontal=True
+            horizontal=False # Xếp dọc
         )
         
         st.write("") # Spacer
