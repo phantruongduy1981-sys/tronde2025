@@ -1,5 +1,5 @@
 """
-Trộn Đề Word Online - AIOMT Premium (Merged Final Version)
+Trộn Đề Word Online - AIOMT Premium (Fixed Version)
 Author: Phan Trường Duy - THPT Minh Đức
 """
 
@@ -21,13 +21,13 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ==================== CSS CUSTOM DESIGN (THEO YÊU CẦU) ====================
+# ==================== CSS CUSTOM DESIGN ====================
 st.markdown("""
 <style>
-    /* 1. HEADER (TO 200%, KHÍT DÒNG, CAO 75%) */
+    /* 1. HEADER */
     .main-header {
         text-align: center;
-        padding: 1.5rem 0; /* Giảm padding */
+        padding: 1.5rem 0;
         background: linear-gradient(to right, #009688, #00796b);
         color: white;
         border-radius: 0 0 15px 15px;
@@ -36,8 +36,8 @@ st.markdown("""
     }
     .main-header h1 {
         font-family: 'Arial', sans-serif;
-        font-weight: 800; /* Nét đều, đậm */
-        font-size: 3rem !important; /* To 200% */
+        font-weight: 800;
+        font-size: 3rem !important;
         text-transform: uppercase;
         margin: 0;
         line-height: 1.1;
@@ -46,7 +46,7 @@ st.markdown("""
     .main-header p {
         font-family: 'Arial', sans-serif;
         font-size: 1.1rem;
-        margin-top: 5px; /* Khít lại */
+        margin-top: 5px;
         margin-bottom: 0;
         opacity: 0.9;
         font-weight: 500;
@@ -76,7 +76,7 @@ st.markdown("""
         font-weight: bold;
     }
 
-    /* 3. KHUNG HƯỚNG DẪN (HTML CHUẨN) */
+    /* 3. KHUNG HƯỚNG DẪN */
     .instruction-card {
         background-color: #e0f2f1;
         border-radius: 10px;
@@ -109,7 +109,7 @@ st.markdown("""
         font-weight: bold;
     }
 
-    /* 4. CUSTOM RADIO BUTTONS (DẠNG THẺ DỌC - NHƯ HÌNH) */
+    /* 4. CUSTOM RADIO BUTTONS */
     div[role="radiogroup"] {
         display: flex;
         flex-direction: column; 
@@ -433,10 +433,16 @@ def validate_document(blocks):
     return errors, warnings
 
 def process_document_final(file_bytes, num_versions, filename_prefix, auto_fix_img, shuffle_mode="auto"):
-    # TẠO BYTES MỚI CHO MỖI LẦN GỌI ĐỂ TRÁNH BAD MAGIC NUMBER
+    # --- [FIXED] TẠO BYTES MỚI VÀ SEEK(0) ĐỂ TRÁNH BAD MAGIC NUMBER ---
     input_buffer = io.BytesIO(file_bytes)
-    if not zipfile.is_zipfile(input_buffer): raise Exception("File không hợp lệ.")
+    input_buffer.seek(0) # Quan trọng: Reset con trỏ về đầu
     
+    if not zipfile.is_zipfile(input_buffer): 
+        raise Exception("File không hợp lệ hoặc bị lỗi định dạng.")
+    
+    input_buffer.seek(0) # Đảm bảo reset lại trước khi ZipFile đọc
+    # ------------------------------------------------------------------
+
     zip_in = zipfile.ZipFile(input_buffer, 'r')
     doc_xml = zip_in.read("word/document.xml").decode('utf-8')
     if auto_fix_img: doc_xml = fix_floating_images_in_xml(doc_xml)
@@ -572,7 +578,7 @@ def main():
     col_left, col_right = st.columns([1, 1], gap="medium")
 
     with col_left:
-        # HƯỚNG DẪN HTML (KHÔNG THỤT DÒNG ĐỂ TRÁNH LỖI)
+        # HƯỚNG DẪN HTML
         with st.expander("📄 Hướng dẫn & Cấu trúc (Bấm để xem)", expanded=False):
             st.markdown("""
 <div style="text-align: right; margin-bottom: 10px;">
@@ -602,16 +608,27 @@ style="background-color:#009688; color:white; padding:5px 10px; border-radius:5p
         st.markdown('<div class="step-label"><div class="step-badge">1</div>Chọn file đề Word (*.docx)</div>', unsafe_allow_html=True)
         uploaded_file = st.file_uploader("Kéo thả file vào đây", type=["docx"], label_visibility="collapsed")
         
+        # --- [FIXED] QUẢN LÝ FILE UPLOAD ĐỂ TRÁNH LỖI READ() ---
         if uploaded_file is not None:
-            # FIX: LƯU FILE VÀO SESSION ĐỂ TRÁNH LỖI BAD MAGIC NUMBER KHI RERUN
-            uploaded_file.seek(0)
-            st.session_state['file_bytes'] = uploaded_file.read()
+            # Tạo ID file để kiểm tra xem có phải file mới không
+            file_id = f"{uploaded_file.name}_{uploaded_file.size}"
+            
+            # Chỉ đọc lại nếu là file mới (hoặc session chưa có)
+            if 'current_file_id' not in st.session_state or st.session_state.get('current_file_id') != file_id:
+                uploaded_file.seek(0)
+                st.session_state['file_bytes'] = uploaded_file.read()
+                st.session_state['current_file_id'] = file_id
+                st.session_state['is_valid'] = True
+            
+            # Từ giờ dùng file_bytes trong session thay vì uploaded_file trực tiếp
             st.success(f"✅ Đã tải lên: {uploaded_file.name}")
             
             if st.button("🔍 Kiểm tra cấu trúc & Lỗi"):
                 try:
-                    # Đọc từ Session
+                    # Đọc từ Session State
                     input_buffer = io.BytesIO(st.session_state['file_bytes'])
+                    input_buffer.seek(0) # Đảm bảo con trỏ ở đầu
+
                     zip_in = zipfile.ZipFile(input_buffer, 'r')
                     doc_xml = zip_in.read("word/document.xml").decode('utf-8')
                     dom = minidom.parseString(doc_xml)
@@ -654,11 +671,13 @@ style="background-color:#009688; color:white; padding:5px 10px; border-radius:5p
         st.markdown("---")
         
         if st.button("🚀 Trộn đề & Tải xuống"):
+            # Kiểm tra xem đã có dữ liệu trong session chưa
             if 'file_bytes' in st.session_state:
                 if st.session_state.get('is_valid', True):
                     with st.spinner("Đang xử lý..."):
                         do_fix = st.session_state.get('auto_fix_img', True)
                         try:
+                            # Truyền file_bytes từ session vào hàm xử lý
                             z_data, e_data = process_document_final(
                                 st.session_state['file_bytes'], num_mix, "KiemTra", do_fix, mode
                             )
