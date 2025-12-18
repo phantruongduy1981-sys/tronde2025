@@ -14,81 +14,73 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS - ĐÃ CHỈNH SỬA THEO YÊU CẦU "KHÍT LẠI" VÀ MÀU SẮC
+# ==================== CSS GIAO DIỆN (GIỮ NGUYÊN) ====================
 st.markdown("""
 <style>
-    /* 1. Cấu hình chung - Giảm khoảng cách lề */
+    /* 1. Cấu hình chung */
     .block-container {
-        padding-top: 1rem !important; /* Đẩy sát lên trên */
+        padding-top: 1rem !important;
         padding-bottom: 2rem !important;
-        max-width: 95% !important;
+        max-width: 98% !important;
     }
-    
-    /* Giảm khoảng cách giữa các element của Streamlit */
     div[data-testid="stVerticalBlock"] > div {
-        gap: 0.3rem !important; /* Khoảng cách cực nhỏ (khít) */
+        gap: 0.5rem !important;
     }
-
-    /* 2. Header Card - Thêm màu xanh, giảm padding */
     .header-card {
-        /* Màu nền: Trắng chuyển sang Xanh ngọc đậm hơn chút */
-        background: linear-gradient(180deg, #ffffff 0%, #d1fae5 100%); 
-        border: 2px solid #brent;
+        background: linear-gradient(180deg, #ffffff 0%, #d1fae5 100%);
+        border: 1px solid #a7f3d0;
         border-radius: 15px;
-        padding: 10px 5px; /* Giảm padding để gọn hơn */
+        padding: 10px 5px;
         text-align: center;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        margin-bottom: 10px; /* Giảm lề dưới */
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        margin-bottom: 10px;
     }
-    
     .header-card h1 {
         color: #d93025; 
-        font-size: clamp(2.2rem, 3.5vw, 4rem) !important; 
+        font-size: clamp(2rem, 3.5vw, 3.5rem) !important; 
         white-space: nowrap !important;
         font-weight: 900;
         text-transform: uppercase;
         margin: 0 !important;
         line-height: 1.1;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
     }
-    
     .header-card h2 {
         color: #0d9488;
-        font-size: 1.8rem !important;
+        font-size: 1.6rem !important;
         font-weight: bold;
-        margin: 0 !important; /* Bỏ margin để sát dòng trên */
-        padding-top: 5px !important; /* Chỉ cách dòng trên 1 xíu */
+        margin: 0 !important;
+        padding-top: 2px !important;
     }
-
-    /* 3. Vùng Hướng dẫn */
+    .step-header {
+        color: #0d9488;
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+        border-left: 5px solid #0d9488;
+        padding-left: 10px;
+        background-color: #f0fdfa;
+        border-radius: 0 5px 5px 0;
+    }
+    div[data-testid="stNumberInput"] label p {
+        font-size: 1.5rem !important;
+        font-weight: 900 !important;
+        color: #0d9488;
+    }
+    div[data-testid="stNumberInput"] input {
+        font-size: 1.5rem !important;
+        font-weight: bold;
+        color: #d93025; 
+        height: 3rem;
+    }
     .instruction-container {
-        background-color: #f0fdfa; /* Nền xanh rất nhạt */
+        background-color: #f0fdfa;
         border: 1px solid #99f6e4;
-        border-radius: 12px;
+        border-radius: 10px;
         padding: 15px;
         font-size: 1.1rem !important;
         line-height: 1.4;
     }
-    .instruction-container strong {
-        color: #0f766e;
-        font-weight: 700;
-    }
-    .instruction-container li {
-        margin-bottom: 4px;
-    }
-
-    /* 4. Tăng kích thước các thành phần Input */
-    .stMarkdown p, .stRadio label, .stNumberInput label, .stFileUploader label {
-        font-size: 1.2rem !important;
-        font-weight: 600;
-        margin-bottom: 0px !important;
-    }
-    div[data-baseweb="input"] {
-        height: 2.8rem;
-        border-radius: 8px;
-    }
-
-    /* 5. Nút bấm (Button) */
     .stButton > button {
         width: 100%;
         background: linear-gradient(90deg, #0d9488, #14b8a6);
@@ -100,14 +92,12 @@ st.markdown("""
         border-radius: 10px;
         box-shadow: 0 4px 10px rgba(13, 148, 136, 0.3);
         text-transform: uppercase;
-        margin-top: 5px;
+        margin-top: 15px;
     }
     .stButton > button:hover {
         background: linear-gradient(90deg, #0f766e, #0d9488);
         transform: scale(1.01);
     }
-
-    /* Footer - Gọn gàng */
     .footer {
         text-align: center;
         color: #64748b;
@@ -116,14 +106,10 @@ st.markdown("""
         margin-top: 1rem;
         font-size: 1.1rem;
     }
-    .footer strong {
-        color: #0d9488;
-        font-size: 1.3rem;
-    }
 </style>
 """, unsafe_allow_html=True)
 
-# ==================== LOGIC TRỘN ĐỀ (GIỮ NGUYÊN 100% CỐT LÕI) ====================
+# ==================== LOGIC XỬ LÝ WORD (CORE) ====================
 
 W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
@@ -141,6 +127,51 @@ def get_text(block):
         if t.firstChild and t.firstChild.nodeValue:
             texts.append(t.firstChild.nodeValue)
     return "".join(texts).strip()
+
+def is_marked_correct(node):
+    """Kiểm tra gạch chân, màu đỏ, highlight"""
+    u_nodes = node.getElementsByTagNameNS(W_NS, "u")
+    for u in u_nodes:
+        val = u.getAttributeNS(W_NS, "val")
+        if val and val != "none": return True
+    
+    color_nodes = node.getElementsByTagNameNS(W_NS, "color")
+    for c in color_nodes:
+        val = c.getAttributeNS(W_NS, "val")
+        if val and val not in ["auto", "000000"]: return True
+            
+    highlight_nodes = node.getElementsByTagNameNS(W_NS, "highlight")
+    for h in highlight_nodes:
+        val = h.getAttributeNS(W_NS, "val")
+        if val and val != "none": return True
+    
+    shd_nodes = node.getElementsByTagNameNS(W_NS, "shd")
+    for s in shd_nodes:
+        val = s.getAttributeNS(W_NS, "fill")
+        if val and val not in ["auto", "FFFFFF", "000000"]: return True
+
+    return False
+
+# --- HÀM LỌC ĐÁP ÁN P3: CẮT BỎ CÁC TỪ THỪA ---
+def extract_highlighted_text(blocks):
+    """Lấy text đáp án và làm sạch"""
+    extracted_text = []
+    for block in blocks:
+        runs = block.getElementsByTagNameNS(W_NS, "r")
+        for run in runs:
+            if is_marked_correct(run): 
+                t_nodes = run.getElementsByTagNameNS(W_NS, "t")
+                for t in t_nodes:
+                    if t.firstChild and t.firstChild.nodeValue:
+                        extracted_text.append(t.firstChild.nodeValue)
+    
+    full_text = "".join(extracted_text).strip()
+    
+    # Lọc bỏ "Câu 1.", "Câu 1:", "ĐS:", "Đáp số:", "KQ:"...
+    full_text = re.sub(r'^(Câu\s*\d+[\.\:]\s*)?', '', full_text, flags=re.IGNORECASE)
+    full_text = re.sub(r'^(ĐS|Đáp số|Đáp án|KQ|Kết quả)[\.\:]?\s*', '', full_text, flags=re.IGNORECASE)
+    
+    return full_text.strip()
 
 def style_run_blue_bold(run):
     doc = run.ownerDocument
@@ -169,23 +200,21 @@ def update_mcq_label(paragraph, new_label):
     for i, t in enumerate(t_nodes):
         if not t.firstChild or not t.firstChild.nodeValue: continue
         txt = t.firstChild.nodeValue
-        m = re.match(r'^(\s*)([A-D])([\.\)])?', txt, re.IGNORECASE)
+        m = re.match(r'^(\s*)([A-D])(\s*[\.\)])?', txt, re.IGNORECASE)
         if not m: continue
-        leading_space = m.group(1) or ""; old_punct = m.group(3) or ""; after_match = txt[m.end():]
-        if old_punct: t.firstChild.nodeValue = leading_space + new_letter + new_punct + after_match
-        else:
-            t.firstChild.nodeValue = leading_space + new_letter + after_match
-            found_punct = False
+        leading_space = m.group(1) or ""; after_match = txt[m.end():]
+        t.firstChild.nodeValue = leading_space + new_letter + new_punct + after_match
+        run = t.parentNode
+        if run and run.localName == "r": style_run_blue_bold(run)
+        found_punct_in_regex = bool(m.group(3))
+        if not found_punct_in_regex:
             for j in range(i + 1, len(t_nodes)):
                 t2 = t_nodes[j]
                 if not t2.firstChild or not t2.firstChild.nodeValue: continue
                 txt2 = t2.firstChild.nodeValue
-                if re.match(r'^[\.\)]', txt2): t2.firstChild.nodeValue = new_punct + txt2[1:]
+                if re.match(r'^[\.\)]', txt2): t2.firstChild.nodeValue = txt2[1:]; break
                 elif re.match(r'^\s*$', txt2): continue
                 else: break
-            if not found_punct: t.firstChild.nodeValue = leading_space + new_letter + new_punct + after_match
-        run = t.parentNode
-        if run and run.localName == "r": style_run_blue_bold(run)
         break
 
 def update_tf_label(paragraph, new_label):
@@ -195,23 +224,21 @@ def update_tf_label(paragraph, new_label):
     for i, t in enumerate(t_nodes):
         if not t.firstChild or not t.firstChild.nodeValue: continue
         txt = t.firstChild.nodeValue
-        m = re.match(r'^(\s*)([a-d])(\))?', txt, re.IGNORECASE)
+        m = re.match(r'^(\s*)([a-d])(\s*[\.\)])?', txt, re.IGNORECASE)
         if not m: continue
-        leading_space = m.group(1) or ""; old_punct = m.group(3) or ""; after_match = txt[m.end():]
-        if old_punct: t.firstChild.nodeValue = leading_space + new_letter + new_punct + after_match
-        else:
-            t.firstChild.nodeValue = leading_space + new_letter + after_match
-            found_punct = False
+        leading_space = m.group(1) or ""; after_match = txt[m.end():]
+        t.firstChild.nodeValue = leading_space + new_letter + new_punct + after_match
+        run = t.parentNode
+        if run and run.localName == "r": style_run_blue_bold(run)
+        found_punct_in_regex = bool(m.group(3))
+        if not found_punct_in_regex:
             for j in range(i + 1, len(t_nodes)):
                 t2 = t_nodes[j]
                 if not t2.firstChild or not t2.firstChild.nodeValue: continue
                 txt2 = t2.firstChild.nodeValue
-                if re.match(r'^\)', txt2): found_punct = True; break
+                if re.match(r'^\)', txt2): t2.firstChild.nodeValue = txt2[1:]; break
                 elif re.match(r'^\s*$', txt2): continue
                 else: break
-            if not found_punct: t.firstChild.nodeValue = leading_space + new_letter + new_punct + after_match
-        run = t.parentNode
-        if run and run.localName == "r": style_run_blue_bold(run)
         break
 
 def update_question_label(paragraph, new_label):
@@ -262,15 +289,56 @@ def parse_questions_in_range(blocks, start, end):
     return intro, questions
 
 def shuffle_mcq_options(question_blocks):
-    indices = []
+    indices = []; correct_char = None
     for i, block in enumerate(question_blocks):
         text = get_text(block)
         if re.match(r'^\s*[A-D][\.\)]', text, re.IGNORECASE): indices.append(i)
-    if len(indices) < 2: return question_blocks
-    options = [question_blocks[idx] for idx in indices]
-    shuffled = shuffle_array(options)
+    if len(indices) < 2: return question_blocks, None
+    original_options = [question_blocks[idx] for idx in indices]
+    marked_index = -1
+    for k, opt_block in enumerate(original_options):
+        if is_marked_correct(opt_block):
+            marked_index = k; break
+    shuffled_options = shuffle_array(original_options)
+    if marked_index != -1:
+        target_block = original_options[marked_index]
+        try:
+            new_pos = shuffled_options.index(target_block)
+            letters = ["A", "B", "C", "D"]
+            if new_pos < len(letters): correct_char = letters[new_pos]
+        except: pass
     min_idx = min(indices); max_idx = max(indices)
-    return question_blocks[:min_idx] + shuffled + question_blocks[max_idx + 1:]
+    return question_blocks[:min_idx] + shuffled_options + question_blocks[max_idx + 1:], correct_char
+
+def shuffle_tf_options(question_blocks):
+    option_indices = {}
+    for i, block in enumerate(question_blocks):
+        text = get_text(block)
+        m = re.match(r'^\s*([a-d])\)', text, re.IGNORECASE)
+        if m: option_indices[m.group(1).lower()] = i
+    abc_keys = [k for k in ['a', 'b', 'c'] if k in option_indices]
+    if len(abc_keys) < 2: return question_blocks, ""
+    items_to_shuffle = []
+    for k in abc_keys:
+        blk = question_blocks[option_indices[k]]
+        stat = 'Đ' if is_marked_correct(blk) else 'S'
+        items_to_shuffle.append({'block': blk, 'status': stat})
+    shuffled_items = shuffle_array(items_to_shuffle)
+    d_item = None
+    if 'd' in option_indices:
+        blk = question_blocks[option_indices['d']]
+        stat = 'Đ' if is_marked_correct(blk) else 'S'
+        d_item = {'block': blk, 'status': stat}
+    final_ordered_items = shuffled_items.copy()
+    if d_item: final_ordered_items.append(d_item)
+    ans_parts = [item['status'] for item in final_ordered_items]
+    ans_str = "-".join(ans_parts)
+    target_indices = sorted([v for k,v in option_indices.items() if k in ['a','b','c','d']])
+    new_blocks = question_blocks.copy()
+    for i, target_idx in enumerate(target_indices):
+        if i < len(final_ordered_items):
+            new_blocks[target_idx] = final_ordered_items[i]['block']
+    return new_blocks, ans_str
 
 def relabel_mcq_options(question_blocks):
     letters = ["A", "B", "C", "D"]; option_blocks = []
@@ -281,23 +349,6 @@ def relabel_mcq_options(question_blocks):
         letter = letters[idx] if idx < len(letters) else letters[-1]
         update_mcq_label(block, f"{letter}.")
 
-def shuffle_tf_options(question_blocks):
-    option_indices = {}
-    for i, block in enumerate(question_blocks):
-        text = get_text(block)
-        m = re.match(r'^\s*([a-d])\)', text, re.IGNORECASE)
-        if m: option_indices[m.group(1).lower()] = i
-    abc_idx = [option_indices.get(k) for k in ["a", "b", "c"] if option_indices.get(k) is not None]
-    if len(abc_idx) < 2: return question_blocks
-    abc_nodes = [question_blocks[idx] for idx in abc_idx]
-    shuffled_abc = shuffle_array(abc_nodes)
-    all_idx = [v for v in option_indices.values() if v is not None]
-    min_idx = min(all_idx); max_idx = max(all_idx)
-    d_node = question_blocks[option_indices["d"]] if "d" in option_indices else None
-    middle = shuffled_abc.copy()
-    if d_node: middle.append(d_node)
-    return question_blocks[:min_idx] + middle + question_blocks[max_idx + 1:]
-
 def relabel_tf_options(question_blocks):
     letters = ["a", "b", "c", "d"]; option_blocks = []
     for block in question_blocks:
@@ -307,146 +358,212 @@ def relabel_tf_options(question_blocks):
         letter = letters[idx] if idx < len(letters) else letters[-1]
         update_tf_label(block, f"{letter})")
 
-def relabel_questions(questions):
+def relabel_questions(questions, start_index=1):
     for i, q_blocks in enumerate(questions):
         if not q_blocks: continue
-        update_question_label(q_blocks[0], f"Câu {i + 1}.")
+        update_question_label(q_blocks[0], f"Câu {start_index + i}.")
 
-def process_part(blocks, start, end, part_type):
+def process_part(blocks, start, end, part_type, start_number=1):
     intro, questions = parse_questions_in_range(blocks, start, end)
-    if part_type == "PHAN1": processed_questions = [shuffle_mcq_options(q) for q in questions]
-    elif part_type == "PHAN2": processed_questions = [shuffle_tf_options(q) for q in questions]
-    else: processed_questions = [q.copy() for q in questions]
-    shuffled_questions = shuffle_array(processed_questions)
-    relabel_questions(shuffled_questions)
-    if part_type == "PHAN1": 
-        for q in shuffled_questions: relabel_mcq_options(q)
+    questions_data = [] 
+    for q in questions:
+        if part_type == "PHAN1":
+            new_q_blocks, ans = shuffle_mcq_options(q)
+            questions_data.append((new_q_blocks, ans))
+        elif part_type == "PHAN2":
+            new_q_blocks, ans = shuffle_tf_options(q)
+            questions_data.append((new_q_blocks, ans))
+        elif part_type == "PHAN3":
+            ans = extract_highlighted_text(q) 
+            questions_data.append((q, ans))
+        else:
+            questions_data.append((q, None))
+    shuffled_data = shuffle_array(questions_data)
+    final_questions_blocks = [x[0] for x in shuffled_data]
+    final_answers_list = [x[1] for x in shuffled_data]
+    relabel_questions(final_questions_blocks, start_number)
+    if part_type == "PHAN1":
+        for q in final_questions_blocks: relabel_mcq_options(q)
     elif part_type == "PHAN2":
-        for q in shuffled_questions: relabel_tf_options(q)
+        for q in final_questions_blocks: relabel_tf_options(q)
     result = intro.copy()
-    for q in shuffled_questions: result.extend(q)
-    return result
+    for q in final_questions_blocks: result.extend(q)
+    part_answers = {}
+    for i, ans in enumerate(final_answers_list):
+        if ans: part_answers[start_number + i] = ans
+    next_number = start_number + len(final_questions_blocks)
+    return result, next_number, part_answers
 
 def process_all_as_mcq(blocks):
     intro, questions = parse_questions_in_range(blocks, 0, len(blocks))
-    processed_questions = [shuffle_mcq_options(q) for q in questions]
-    shuffled_questions = shuffle_array(processed_questions)
-    relabel_questions(shuffled_questions)
-    for q in shuffled_questions: relabel_mcq_options(q)
+    questions_data = []
+    for q in questions:
+        b, a = shuffle_mcq_options(q)
+        questions_data.append((b, a))
+    shuffled = shuffle_array(questions_data)
+    final_blocks = [x[0] for x in shuffled]
+    final_ans = [x[1] for x in shuffled]
+    relabel_questions(final_blocks, 1)
+    for q in final_blocks: relabel_mcq_options(q)
     result = intro.copy()
-    for q in shuffled_questions: result.extend(q)
-    return result
+    for q in final_blocks: result.extend(q)
+    answers = {}
+    for i, a in enumerate(final_ans):
+        if a: answers[i+1] = a
+    return result, answers
 
-def process_all_as_tf(blocks):
-    intro, questions = parse_questions_in_range(blocks, 0, len(blocks))
-    processed_questions = [shuffle_tf_options(q) for q in questions]
-    shuffled_questions = shuffle_array(processed_questions)
-    relabel_questions(shuffled_questions)
-    for q in shuffled_questions: relabel_tf_options(q)
-    result = intro.copy()
-    for q in shuffled_questions: result.extend(q)
-    return result
-
-# --- CẬP NHẬT LOGIC CHÍNH: XỬ LÝ GIỮ NGUYÊN THÔNG TIN ĐẦU VÀ PHẦN 4 ---
 def shuffle_docx(file_bytes, shuffle_mode="auto"):
     input_buffer = io.BytesIO(file_bytes)
+    all_answers = {} 
     with zipfile.ZipFile(input_buffer, 'r') as zin:
         doc_xml = zin.read("word/document.xml").decode('utf-8')
         dom = minidom.parseString(doc_xml)
-        body_list = dom.getElementsByTagNameNS(W_NS, "body")
-        if not body_list: raise Exception("Không tìm thấy w:body")
-        body = body_list[0]
-        
-        blocks = []
-        for child in body.childNodes:
-            if child.nodeType == child.ELEMENT_NODE and child.localName in ["p", "tbl"]: blocks.append(child)
+        body = dom.getElementsByTagNameNS(W_NS, "body")[0]
+        blocks = [c for c in body.childNodes if c.nodeType == c.ELEMENT_NODE and c.localName in ["p", "tbl"]]
         
         if shuffle_mode == "mcq":
-            new_blocks = process_all_as_mcq(blocks)
+            new_blocks, ans = process_all_as_mcq(blocks)
+            all_answers["P1"] = ans
         elif shuffle_mode == "tf":
-            new_blocks = process_all_as_tf(blocks)
+            new_blocks, _ = process_all_as_mcq(blocks)
         else:
-            p1_idx = find_part_index(blocks, 1)
-            p2_idx = find_part_index(blocks, 2)
-            p3_idx = find_part_index(blocks, 3)
-            p4_idx = find_part_index(blocks, 4) # Tìm phần 4 (Tự luận)
-            
-            new_blocks = []
-            cursor = 0
-            
-            # 1. XỬ LÝ PHẦN 1 VÀ THÔNG TIN ĐẦU ĐỀ (GIỮ NGUYÊN THÔNG TIN TRƯỚC PHẦN 1)
+            p1_idx = find_part_index(blocks, 1); p2_idx = find_part_index(blocks, 2)
+            p3_idx = find_part_index(blocks, 3); p4_idx = find_part_index(blocks, 4)
+            new_blocks = []; cursor = 0; curr_num = 1
             if p1_idx >= 0:
-                # Copy toàn bộ nội dung từ đầu đến dòng "PHẦN 1"
-                new_blocks.extend(blocks[cursor:p1_idx + 1]) 
-                cursor = p1_idx + 1
-                
-                # Xác định điểm kết thúc Phần 1 (là đầu Phần 2 hoặc Phần 3 hoặc Phần 4 hoặc Hết)
+                new_blocks.extend(blocks[cursor:p1_idx + 1]); cursor = p1_idx + 1
                 end1 = len(blocks)
                 if p2_idx >= 0: end1 = p2_idx
                 elif p3_idx >= 0: end1 = p3_idx
                 elif p4_idx >= 0: end1 = p4_idx
-                
-                new_blocks.extend(process_part(blocks, cursor, end1, "PHAN1"))
-                cursor = end1
-            
-            # 2. XỬ LÝ PHẦN 2
+                p1_blocks, next_num, p1_ans = process_part(blocks, cursor, end1, "PHAN1", curr_num)
+                new_blocks.extend(p1_blocks)
+                all_answers["P1"] = p1_ans
+                curr_num = next_num; cursor = end1
             if p2_idx >= 0:
-                new_blocks.append(blocks[p2_idx]) # Tiêu đề Phần 2
-                start2 = p2_idx + 1
-                
+                new_blocks.append(blocks[p2_idx]); start2 = p2_idx + 1
                 end2 = len(blocks)
                 if p3_idx >= 0: end2 = p3_idx
                 elif p4_idx >= 0: end2 = p4_idx
-                
-                new_blocks.extend(process_part(blocks, start2, end2, "PHAN2"))
-                cursor = end2
-            
-            # 3. XỬ LÝ PHẦN 3
+                p2_blocks, next_num, p2_ans = process_part(blocks, start2, end2, "PHAN2", curr_num)
+                new_blocks.extend(p2_blocks)
+                all_answers["P2"] = p2_ans 
+                all_answers["P2_Start"] = (curr_num - len(p2_ans)) if p2_ans else curr_num
+                all_answers["P2_Count"] = len(p2_ans) if p2_ans else 0
+                curr_num = next_num; cursor = end2
             if p3_idx >= 0:
-                new_blocks.append(blocks[p3_idx]) # Tiêu đề Phần 3
-                start3 = p3_idx + 1
-                
+                new_blocks.append(blocks[p3_idx]); start3 = p3_idx + 1
                 end3 = len(blocks)
-                if p4_idx >= 0: end3 = p4_idx # Nếu có phần 4 thì dừng ở phần 4
-                
-                new_blocks.extend(process_part(blocks, start3, end3, "PHAN3"))
-                cursor = end3
-
-            # 4. XỬ LÝ PHẦN 4 (GIỮ NGUYÊN - KHÔNG TRỘN)
-            if p4_idx >= 0:
-                # Copy toàn bộ từ tiêu đề Phần 4 đến hết file
-                new_blocks.extend(blocks[p4_idx:])
-            
-            # Trường hợp không tìm thấy Phần nào -> Trộn mặc định MCQ
+                if p4_idx >= 0: end3 = p4_idx
+                p3_blocks, next_num, p3_ans = process_part(blocks, start3, end3, "PHAN3", curr_num)
+                new_blocks.extend(p3_blocks)
+                all_answers["P3"] = p3_ans
+                all_answers["P3_Start"] = (curr_num - len(p3_ans)) if p3_ans else curr_num
+                all_answers["P3_Count"] = len(p3_ans) if p3_ans else 0
+                curr_num = next_num; cursor = end3
+            if p4_idx >= 0: new_blocks.extend(blocks[p4_idx:])
             if p1_idx == -1 and p2_idx == -1 and p3_idx == -1 and p4_idx == -1:
-                new_blocks = process_all_as_mcq(blocks)
+                new_blocks, ans = process_all_as_mcq(blocks)
+                all_answers["P1"] = ans
         
         other_nodes = [c for c in list(body.childNodes) if c.nodeType == c.ELEMENT_NODE and c.localName not in ["p", "tbl"]]
         while body.firstChild: body.removeChild(body.firstChild)
         for block in new_blocks: body.appendChild(block)
         for node in other_nodes: body.appendChild(node)
-        new_xml = dom.toxml()
+        
         output_buffer = io.BytesIO()
         with zipfile.ZipFile(output_buffer, 'w', zipfile.ZIP_DEFLATED) as zout:
             for item in zin.infolist():
-                if item.filename == "word/document.xml": zout.writestr(item, new_xml.encode('utf-8'))
+                if item.filename == "word/document.xml": zout.writestr(item, dom.toxml().encode('utf-8'))
                 else: zout.writestr(item, zin.read(item.filename))
-        return output_buffer.getvalue()
+        return output_buffer.getvalue(), all_answers
+
+def generate_answer_key_html(all_exam_data):
+    html = """
+    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    <head><meta charset='utf-8'><title>Đáp án</title>
+    <style>
+        body { font-family: 'Times New Roman', serif; font-size: 12pt; }
+        h1, h2 { text-align: center; color: #C00000; margin: 5px 0; }
+        h3 { color: #002060; margin-top: 20px; margin-bottom: 5px; font-size: 13pt; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 15px; }
+        th, td { border: 1px solid black; padding: 5px; text-align: center; font-size: 11pt; }
+        th { background-color: #D9E2F3; font-weight: bold; }
+        .note { font-style: italic; font-size: 11pt; color: #002060; margin-bottom: 5px; }
+    </style>
+    </head><body>
+    """
+    html += """
+    <h1>TRƯỜNG THPT MINH ĐỨC</h1>
+    <h2>BẢNG ĐÁP ÁN</h2>
+    <p style='text-align:center; font-weight:bold;'>KIỂM TRA HỌC KỲ I - NĂM HỌC 2025 – 2026</p>
+    <br>
+    """
+    if not all_exam_data: return html + "</body></html>"
+    exam_codes = sorted(all_exam_data.keys())
+    sample_data = all_exam_data[exam_codes[0]]
+    if "P1" in sample_data and sample_data["P1"]:
+        html += "<h3>PHẦN I: Trắc nghiệm nhiều lựa chọn</h3>"
+        html += "<div class='note'>- Mỗi câu đúng được 0,25 điểm.</div>"
+        q_nums = sorted(sample_data["P1"].keys())
+        html += "<table><tr><th>Mã đề</th>"
+        for q in q_nums: html += f"<th>{q}</th>"
+        html += "</tr>"
+        for code in exam_codes:
+            html += f"<tr><td><b>{code}</b></td>"
+            ans_map = all_exam_data[code].get("P1", {})
+            for q in q_nums: html += f"<td><b>{ans_map.get(q, '')}</b></td>"
+            html += "</tr>"
+        html += "</table>"
+    if "P2" in sample_data and sample_data["P2"]:
+        count = sample_data.get("P2_Count", 0)
+        q_nums_p2 = sorted(sample_data["P2"].keys())
+        html += "<h3>PHẦN II: Trắc nghiệm đúng sai</h3>"
+        html += "<div class='note'>- Điểm tối đa mỗi câu là 1 điểm.</div>"
+        html += "<div class='note'>- Đúng 1 ý được 0,1 điểm; đúng 2 ý được 0,25 điểm; đúng 3 ý được 0,5 điểm; đúng 4 ý được 1 điểm.</div>"
+        html += "<table><tr><th>Mã đề</th>"
+        for q in q_nums_p2: html += f"<th>Câu {q}</th>"
+        html += "</tr>"
+        for code in exam_codes:
+            html += f"<tr><td><b>{code}</b></td>"
+            ans_map = all_exam_data[code].get("P2", {})
+            for q in q_nums_p2: html += f"<td><b>{ans_map.get(q, '')}</b></td>"
+            html += "</tr>"
+        html += "</table>"
+    if "P3" in sample_data and sample_data["P3"]:
+        q_nums_p3 = sorted(sample_data["P3"].keys())
+        html += "<h3>PHẦN III: Trắc nghiệm trả lời ngắn</h3>"
+        html += "<div class='note'>- Điểm tối đa mỗi câu là 0,5 điểm.</div>"
+        html += "<table><tr><th>Mã đề</th>"
+        for q in q_nums_p3: html += f"<th>Câu {q}</th>"
+        html += "</tr>"
+        for code in exam_codes:
+            html += f"<tr><td><b>{code}</b></td>"
+            ans_map = all_exam_data[code].get("P3", {})
+            for q in q_nums_p3: html += f"<td><b>{ans_map.get(q, '')}</b></td>"
+            html += "</tr>"
+        html += "</table>"
+    html += "</body></html>"
+    return html
 
 def create_zip_multiple(file_bytes, base_name, num_versions, shuffle_mode, start_code):
     zip_buffer = io.BytesIO()
+    all_exam_data = {}
     with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zout:
         for i in range(num_versions):
-            shuffled = shuffle_docx(file_bytes, shuffle_mode)
             current_code = start_code + i
+            shuffled_bytes, exam_answers = shuffle_docx(file_bytes, shuffle_mode)
+            all_exam_data[current_code] = exam_answers
             filename = f"{base_name}_{current_code}.docx"
-            zout.writestr(filename, shuffled)
+            zout.writestr(filename, shuffled_bytes)
+        try:
+            answer_key_html = generate_answer_key_html(all_exam_data)
+            zout.writestr("Bang_Dap_An.doc", answer_key_html.encode('utf-8'))
+        except Exception as e: print(f"Error creating answer key: {e}")
     return zip_buffer.getvalue()
 
-# ==================== GIAO DIỆN STREAMLIT (CẬP NHẬT) ====================
-
+# ==================== GIAO DIỆN STREAMLIT ====================
 def main():
-    # Header MỚI - GỌN HƠN, XANH HƠN
     st.markdown("""
     <div class="header-card">
         <h1>TRƯỜNG TRUNG HỌC PHỔ THÔNG MINH ĐỨC</h1>
@@ -454,38 +571,33 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # Hướng dẫn
-    with st.expander("📋 Hướng dẫn & Cấu trúc file (Nhấn để xem)", expanded=False):
+    with st.expander("📋 Hướng dẫn & Cấu trúc file", expanded=False):
         st.markdown("""
         <div class="instruction-container">
             <strong>Cấu trúc file Word chuẩn:</strong>
             <ul>
-                <li><strong>PHẦN 1:</strong> Trắc nghiệm (A. B. C. D.) – Trộn câu hỏi + phương án</li>
-                <li><strong>PHẦN 2:</strong> Đúng/Sai (a) b) c) d)) – Trộn câu hỏi + trộn a,b,c (giữ d cố định)</li>
-                <li><strong>PHẦN 3:</strong> Trả lời ngắn – Chỉ trộn thứ tự câu hỏi</li>
-                <li><strong>PHẦN 4:</strong> Tự luận – Giữ nguyên nội dung, không trộn.</li>
+                <li><strong>PHẦN 1:</strong> Trắc nghiệm (A. B. C. D.)</li>
+                <li><strong>PHẦN 2:</strong> Đúng/Sai (a) b) c) d))</li>
+                <li><strong>PHẦN 3:</strong> Trả lời ngắn</li>
+                <li><strong>PHẦN 4:</strong> Tự luận (Giữ nguyên)</li>
             </ul>
-            <strong>Lưu ý:</strong> Nội dung (Tiêu đề, lời dẫn) nằm <strong>trước PHẦN 1</strong> sẽ được giữ nguyên.
-            <p style="margin-top: 10px;">📥 <a href="https://docs.google.com/document/d/1i1b-By6EA_HO8fWgMYG9iXZPGannmWdg/edit?usp=drive_link&ouid=112824050529887271694&rtpof=true&sd=true" target="_blank">Tải file mẫu tại đây</a></p>
+            <strong>HƯỚNG DẪN TẠO ĐÁP ÁN TỰ ĐỘNG:</strong>
+            <ul>
+                <li><strong>Phần 1 & 2:</strong> Vui lòng <b>Gạch chân</b> hoặc <b>Tô màu đỏ</b> ý đúng.</li>
+                <li><strong>Phần 3:</strong> Vui lòng <b>Gạch chân</b> hoặc <b>Tô màu đỏ</b> nội dung đáp án.</li>
+            </ul>
+            <p style="margin-top: 5px;">📥 <a href="https://docs.google.com/document/d/1A3bm_KNbl0vmnuYDfWdkqifS30RD-mLh/edit?usp=sharing&ouid=112824050529887271694&rtpof=true&sd=true" target="_blank">Tải file mẫu tại đây</a></p>
         </div>
         """, unsafe_allow_html=True)
     
-    st.write("") # Spacer
-
-    # 1. Upload file
-    st.subheader("1️⃣ Chọn file đề Word (.docx)")
-    uploaded_file = st.file_uploader("", type=["docx"])
-    
-    if uploaded_file:
-        st.success(f"✅ Đã chọn: **{uploaded_file.name}**")
-    
-    st.divider()
-    
-    # 2. Cấu hình
     col_left, col_right = st.columns([1, 1], gap="large")
-    
+
     with col_left:
-        st.subheader("2️⃣ Kiểu trộn")
+        st.markdown('<div class="step-header">1️⃣ CHỌN FILE ĐỀ & KIỂU TRỘN</div>', unsafe_allow_html=True)
+        uploaded_file = st.file_uploader("", type=["docx"], label_visibility="collapsed")
+        if uploaded_file:
+            st.success(f"✅ Đã tải lên: **{uploaded_file.name}**")
+        
         shuffle_mode = st.radio(
             "Chọn chế độ:",
             options=["auto", "mcq", "tf"],
@@ -498,47 +610,43 @@ def main():
         )
 
     with col_right:
-        st.subheader("3️⃣ Cấu hình mã đề")
+        st.markdown('<div class="step-header">2️⃣ CẤU HÌNH MÃ ĐỀ</div>', unsafe_allow_html=True)
         c1, c2 = st.columns(2)
         with c1:
-            num_versions = st.number_input("Số lượng đề:", min_value=1, max_value=50, value=4)
+            num_versions = st.number_input("Số lượng đề", min_value=1, max_value=50, value=4)
         with c2:
-            start_code = st.number_input("Mã bắt đầu:", min_value=0, value=101)
+            start_code = st.number_input("Mã đề bắt đầu", min_value=0, value=101)
         
         if num_versions > 1:
-            st.info(f"📦 Tạo {num_versions} đề: Từ mã {start_code} ➝ {start_code + num_versions - 1}")
+            st.info(f"📦 Tạo {num_versions} đề: {start_code} ➝ {start_code + num_versions - 1}")
         else:
-            st.info(f"📄 Tạo 1 đề: Mã {start_code}")
+            st.info(f"📄 Tạo 1 đề: {start_code}")
 
-    st.write("") 
-
-    # 4. Nút trộn đề
-    if st.button("🎲 BẮT ĐẦU TRỘN ĐỀ", type="primary", use_container_width=True):
+    st.markdown('<div class="step-header">3️⃣ THỰC HIỆN</div>', unsafe_allow_html=True)
+    if st.button("🎲 BẮT ĐẦU TRỘN ĐỀ & TẢI VỀ", type="primary", use_container_width=True):
         if not uploaded_file:
             st.warning("⚠️ Vui lòng chọn file Word trước khi trộn!")
         else:
             try:
-                with st.spinner("🚀 Đang xử lý dữ liệu..."):
+                with st.spinner("🚀 Đang xử lý và tạo bảng đáp án..."):
                     file_bytes = uploaded_file.read()
                     base_name = re.sub(r'[^\w\s-]', '', uploaded_file.name.replace(".docx", "")).strip() or "De"
                     
                     if num_versions == 1:
-                        result = shuffle_docx(file_bytes, shuffle_mode)
-                        filename = f"{base_name}_{start_code}.docx"
-                        mime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        result = create_zip_multiple(file_bytes, base_name, 1, shuffle_mode, start_code)
+                        filename = f"{base_name}_Mix_{start_code}.zip"
                     else:
                         result = create_zip_multiple(file_bytes, base_name, num_versions, shuffle_mode, start_code)
-                        filename = f"{base_name}_From_{start_code}.zip"
-                        mime = "application/zip"
+                        filename = f"{base_name}_Mix_From_{start_code}.zip"
+                    
+                    mime = "application/zip"
                 
                 st.balloons()
-                st.success("✅ TRỘN ĐỀ THÀNH CÔNG! BẤM NÚT DƯỚI ĐỂ TẢI.")
+                st.success("✅ THÀNH CÔNG! File tải về đã bao gồm Đề thi và Bảng đáp án.")
                 st.download_button(label=f"📥 TẢI XUỐNG {filename}", data=result, file_name=filename, mime=mime, use_container_width=True)
-                
             except Exception as e:
                 st.error(f"❌ Lỗi: {str(e)}")
     
-    # Footer - CẬP NHẬT: CHỈ CÒN ZALO
     st.markdown("""
     <div class="footer">
         <p>Zalo hỗ trợ kỹ thuật: <strong>038994070</strong></p>
