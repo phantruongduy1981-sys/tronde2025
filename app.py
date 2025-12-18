@@ -10,124 +10,114 @@ from xml.dom import minidom
 st.set_page_config(
     page_title="Trộn Đề Word - THPT Minh Đức",
     page_icon="🏫",
-    layout="wide",  # Layout toàn màn hình
+    layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS - Đã sửa lỗi xuống dòng tiêu đề
+# ==================== CSS GIAO DIỆN (ĐÃ CHỈNH SỬA "KHÍT" & MÀU XANH) ====================
 st.markdown("""
 <style>
-    /* 1. Cấu hình chung */
+    /* 1. Cấu hình chung - Đẩy sát lề trên */
     .block-container {
-        padding-top: 2rem !important;
-        padding-bottom: 3rem !important;
-        max-width: 95% !important;
+        padding-top: 1rem !important;
+        padding-bottom: 2rem !important;
+        max-width: 98% !important;
+    }
+    
+    /* Giảm khoảng cách giữa các thành phần */
+    div[data-testid="stVerticalBlock"] > div {
+        gap: 0.3rem !important;
     }
 
-    /* 2. Header Card */
+    /* 2. Header Card - Màu Xanh Ngọc */
     .header-card {
-        background: linear-gradient(180deg, #ffffff 0%, #e0f2fe 100%);
-        border: 2px solid #brent;
-        border-radius: 20px;
-        padding: 30px 10px;
+        background: linear-gradient(180deg, #ffffff 0%, #d1fae5 100%); /* Trắng -> Xanh ngọc */
+        border: 1px solid #a7f3d0;
+        border-radius: 15px;
+        padding: 10px 5px; /* Padding nhỏ để khít */
         text-align: center;
-        box-shadow: 0 6px 10px rgba(0,0,0,0.1);
-        margin-bottom: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        margin-bottom: 10px;
     }
     
     .header-card h1 {
         color: #d93025; 
-        /* TỰ ĐỘNG ĐIỀU CHỈNH CỠ CHỮ THEO MÀN HÌNH ĐỂ KHÔNG BỊ XUỐNG DÒNG */
-        font-size: clamp(2.5rem, 4vw, 4.5rem) !important; 
-        white-space: nowrap !important; /* BẮT BUỘC KHÔNG XUỐNG DÒNG */
+        font-size: clamp(2rem, 3.5vw, 3.5rem) !important; 
+        white-space: nowrap !important;
         font-weight: 900;
         text-transform: uppercase;
         margin: 0 !important;
-        line-height: 1.2;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.15);
+        line-height: 1.1;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
     }
     
     .header-card h2 {
         color: #0d9488;
-        font-size: 2.2rem !important;
+        font-size: 1.6rem !important;
         font-weight: bold;
-        margin: 10px 0 0 0 !important;
+        margin: 0 !important;
+        padding-top: 2px !important; /* Sát rạt dòng trên */
     }
 
     /* 3. Vùng Hướng dẫn */
     .instruction-container {
-        background-color: #f8fafc;
-        border: 1px solid #cbd5e1;
-        border-radius: 15px;
-        padding: 25px;
-        font-size: 1.25rem !important;
-        line-height: 1.6;
+        background-color: #f0fdfa;
+        border: 1px solid #99f6e4;
+        border-radius: 10px;
+        padding: 15px;
+        font-size: 1.1rem !important;
+        line-height: 1.4;
     }
     .instruction-container strong {
-        color: #0369a1;
-        font-weight: 700;
+        color: #0f766e;
     }
     .instruction-container li {
-        margin-bottom: 8px;
+        margin-bottom: 3px;
     }
 
-    /* 4. Tăng kích thước các thành phần Input */
+    /* 4. Tùy chỉnh Font chữ Input */
     .stMarkdown p, .stRadio label, .stNumberInput label, .stFileUploader label {
-        font-size: 1.3rem !important;
+        font-size: 1.1rem !important;
         font-weight: 600;
-    }
-    .stRadio div[role="radiogroup"] label p {
-        font-size: 1.2rem !important;
-    }
-    div[data-baseweb="input"] {
-        height: 3rem;
-        border-radius: 10px;
-    }
-    div[data-baseweb="input"] input {
-        font-size: 1.2rem !important;
-        text-align: center;
+        margin-bottom: 0px !important;
     }
 
-    /* 5. Nút bấm (Button) */
+    /* 5. Nút bấm */
     .stButton > button {
         width: 100%;
         background: linear-gradient(90deg, #0d9488, #14b8a6);
         color: white;
         border: none;
-        padding: 1rem 2rem;
-        font-size: 1.5rem !important;
+        padding: 0.8rem 1.5rem;
+        font-size: 1.3rem !important;
         font-weight: 800;
-        border-radius: 12px;
+        border-radius: 10px;
         box-shadow: 0 4px 10px rgba(13, 148, 136, 0.3);
         text-transform: uppercase;
-        margin-top: 10px;
+        margin-top: 5px;
     }
     .stButton > button:hover {
         background: linear-gradient(90deg, #0f766e, #0d9488);
         transform: scale(1.01);
     }
-    
-    .stAlert {
-        font-size: 1.1rem !important;
-    }
 
-    /* Footer */
+    /* Footer - Chỉ hiện Zalo */
     .footer {
         text-align: center;
         color: #64748b;
-        padding: 2rem 0;
-        border-top: 2px dashed #cbd5e1;
-        margin-top: 3rem;
+        padding: 1rem 0;
+        border-top: 1px dashed #cbd5e1;
+        margin-top: 1rem;
         font-size: 1.1rem;
     }
     .footer strong {
         color: #0d9488;
-        font-size: 1.2rem;
+        font-size: 1.3rem;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# ==================== LOGIC TRỘN ĐỀ (GIỮ NGUYÊN 100%) ====================
+# ==================== LOGIC TRỘN ĐỀ (GIỮ NGUYÊN BẢN GỐC 100%) ====================
 
 W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
@@ -152,7 +142,7 @@ def get_text(block):
 
 
 def style_run_blue_bold(run):
-    """Tô xanh đậm một run"""
+    """Tô xanh đậm một run - Code gốc đầy đủ"""
     doc = run.ownerDocument
     
     rPr_list = run.getElementsByTagNameNS(W_NS, "rPr")
@@ -177,7 +167,7 @@ def style_run_blue_bold(run):
 
 
 def update_mcq_label(paragraph, new_label):
-    """Cập nhật nhãn A. B. C. D."""
+    """Cập nhật nhãn A. B. C. D. - Code gốc đầy đủ"""
     t_nodes = paragraph.getElementsByTagNameNS(W_NS, "t")
     if not t_nodes:
         return
@@ -228,7 +218,7 @@ def update_mcq_label(paragraph, new_label):
 
 
 def update_tf_label(paragraph, new_label):
-    """Cập nhật nhãn a) b) c) d)"""
+    """Cập nhật nhãn a) b) c) d) - Code gốc đầy đủ"""
     t_nodes = paragraph.getElementsByTagNameNS(W_NS, "t")
     if not t_nodes:
         return
@@ -278,7 +268,7 @@ def update_tf_label(paragraph, new_label):
 
 
 def update_question_label(paragraph, new_label):
-    """Cập nhật nhãn Câu X."""
+    """Cập nhật nhãn Câu X. - Code gốc đầy đủ"""
     t_nodes = paragraph.getElementsByTagNameNS(W_NS, "t")
     if not t_nodes:
         return
@@ -518,7 +508,7 @@ def process_all_as_tf(blocks):
     
     return result
 
-
+# --- CẬP NHẬT LOGIC CHÍNH: XỬ LÝ PHẦN 4 VÀ THÔNG TIN ĐẦU ---
 def shuffle_docx(file_bytes, shuffle_mode="auto"):
     """Trộn file DOCX, trả về bytes"""
     input_buffer = io.BytesIO(file_bytes)
@@ -546,36 +536,59 @@ def shuffle_docx(file_bytes, shuffle_mode="auto"):
             part1_idx = find_part_index(blocks, 1)
             part2_idx = find_part_index(blocks, 2)
             part3_idx = find_part_index(blocks, 3)
+            part4_idx = find_part_index(blocks, 4) # Phát hiện Phần 4
             
             new_blocks = []
             cursor = 0
             
+            # --- XỬ LÝ PHẦN 1 (VÀ NỘI DUNG ĐỨNG TRƯỚC NÓ) ---
             if part1_idx >= 0:
+                # Giữ nguyên nội dung từ đầu file đến trước dòng "PHẦN 1"
                 new_blocks.extend(blocks[cursor:part1_idx + 1])
                 cursor = part1_idx + 1
                 
-                end1 = part2_idx if part2_idx >= 0 else len(blocks)
+                # Xác định điểm kết thúc Phần 1
+                end1 = len(blocks)
+                if part2_idx >= 0: end1 = part2_idx
+                elif part3_idx >= 0: end1 = part3_idx
+                elif part4_idx >= 0: end1 = part4_idx
+                
                 part1_processed = process_part(blocks, cursor, end1, "PHAN1")
                 new_blocks.extend(part1_processed)
                 cursor = end1
             
+            # --- XỬ LÝ PHẦN 2 ---
             if part2_idx >= 0:
                 new_blocks.append(blocks[part2_idx])
                 start2 = part2_idx + 1
-                end2 = part3_idx if part3_idx >= 0 else len(blocks)
+                
+                end2 = len(blocks)
+                if part3_idx >= 0: end2 = part3_idx
+                elif part4_idx >= 0: end2 = part4_idx
+                
                 part2_processed = process_part(blocks, start2, end2, "PHAN2")
                 new_blocks.extend(part2_processed)
                 cursor = end2
             
+            # --- XỬ LÝ PHẦN 3 ---
             if part3_idx >= 0:
                 new_blocks.append(blocks[part3_idx])
                 start3 = part3_idx + 1
+                
                 end3 = len(blocks)
+                if part4_idx >= 0: end3 = part4_idx
+                
                 part3_processed = process_part(blocks, start3, end3, "PHAN3")
                 new_blocks.extend(part3_processed)
                 cursor = end3
+
+            # --- XỬ LÝ PHẦN 4 (GIỮ NGUYÊN) ---
+            if part4_idx >= 0:
+                # Copy toàn bộ từ tiêu đề Phần 4 đến hết
+                new_blocks.extend(blocks[part4_idx:])
             
-            if part1_idx == -1 and part2_idx == -1 and part3_idx == -1:
+            # Nếu không tìm thấy phần nào -> Trộn mặc định MCQ
+            if part1_idx == -1 and part2_idx == -1 and part3_idx == -1 and part4_idx == -1:
                 new_blocks = process_all_as_mcq(blocks)
         
         other_nodes = []
@@ -619,10 +632,10 @@ def create_zip_multiple(file_bytes, base_name, num_versions, shuffle_mode, start
     return zip_buffer.getvalue()
 
 
-# ==================== GIAO DIỆN STREAMLIT (FULL WIDTH) ====================
+# ==================== GIAO DIỆN STREAMLIT (UPDATE) ====================
 
 def main():
-    # Header MỚI - FULL WIDTH & BIG SIZE
+    # Header
     st.markdown("""
     <div class="header-card">
         <h1>TRƯỜNG TRUNG HỌC PHỔ THÔNG MINH ĐỨC</h1>
@@ -630,7 +643,7 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # Hướng dẫn - BIG TEXT
+    # Hướng dẫn
     with st.expander("📋 Hướng dẫn & Cấu trúc file (Nhấn để xem)", expanded=False):
         st.markdown("""
         <div class="instruction-container">
@@ -639,22 +652,16 @@ def main():
                 <li><strong>PHẦN 1:</strong> Trắc nghiệm (A. B. C. D.) – Trộn câu hỏi + phương án</li>
                 <li><strong>PHẦN 2:</strong> Đúng/Sai (a) b) c) d)) – Trộn câu hỏi + trộn a,b,c (giữ d cố định)</li>
                 <li><strong>PHẦN 3:</strong> Trả lời ngắn – Chỉ trộn thứ tự câu hỏi</li>
+                <li><strong>PHẦN 4:</strong> Tự luận – Giữ nguyên nội dung, không trộn.</li>
             </ul>
-            <strong>Quy tắc & Đáp án:</strong>
-            <ul>
-                <li>Mỗi câu bắt đầu bằng <code>Câu 1.</code>, <code>Câu 2.</code>...</li>
-                <li>Phương án MCQ: <code>A.</code> <code>B.</code> <code>C.</code> <code>D.</code> (viết hoa + dấu chấm)</li>
-                <li>Phương án Đúng/Sai: <code>a)</code> <code>b)</code> <code>c)</code> <code>d)</code> (viết thường + dấu ngoặc)</li>
-                <li><strong>Đáp án Phần 1 & 2:</strong> Gạch chân hoặc tô màu đáp án đúng.</li>
-                <li><strong>Đáp án Phần 3:</strong> Ghi đáp án/lời giải ngay sau câu hỏi. Có thể tô màu/gạch chân để làm nổi bật.</li>
-            </ul>
-            <p style="margin-top: 15px;">📥 <a href="https://docs.google.com/document/d/1i1b-By6EA_HO8fWgMYG9iXZPGannmWdg/edit?usp=drive_link&ouid=112824050529887271694&rtpof=true&sd=true" target="_blank">Tải file mẫu tại đây</a></p>
+            <strong>Lưu ý:</strong> Nội dung (Tiêu đề, lời dẫn) nằm <strong>trước PHẦN 1</strong> sẽ được giữ nguyên.
+            <p style="margin-top: 5px;">📥 <a href="https://docs.google.com/document/d/1i1b-By6EA_HO8fWgMYG9iXZPGannmWdg/edit?usp=drive_link&ouid=112824050529887271694&rtpof=true&sd=true" target="_blank">Tải file mẫu tại đây</a></p>
         </div>
         """, unsafe_allow_html=True)
     
-    st.write("") # Spacer
+    st.write("") 
 
-    # 1. Upload file (Dùng cột để căn chỉnh nếu cần, nhưng ở wide mode để mặc định cũng tốt)
+    # 1. Upload file
     st.subheader("1️⃣ Chọn file đề Word (.docx)")
     uploaded_file = st.file_uploader("", type=["docx"])
     
@@ -663,7 +670,7 @@ def main():
     
     st.divider()
     
-    # 2. Cấu hình (Chia cột cho thoáng)
+    # 2. Cấu hình
     col_left, col_right = st.columns([1, 1], gap="large")
     
     with col_left:
@@ -692,9 +699,9 @@ def main():
         else:
             st.info(f"📄 Tạo 1 đề: Mã {start_code}")
 
-    st.write("") # Spacer
+    st.write("") 
 
-    # 4. Nút trộn đề - TO VÀ RÕ
+    # 4. Nút trộn đề
     if st.button("🎲 BẮT ĐẦU TRỘN ĐỀ", type="primary", use_container_width=True):
         if not uploaded_file:
             st.warning("⚠️ Vui lòng chọn file Word trước khi trộn!")
@@ -713,17 +720,16 @@ def main():
                         filename = f"{base_name}_From_{start_code}.zip"
                         mime = "application/zip"
                 
-                st.balloons() # Hiệu ứng chúc mừng
+                st.balloons()
                 st.success("✅ TRỘN ĐỀ THÀNH CÔNG! BẤM NÚT DƯỚI ĐỂ TẢI.")
                 st.download_button(label=f"📥 TẢI XUỐNG {filename}", data=result, file_name=filename, mime=mime, use_container_width=True)
                 
             except Exception as e:
                 st.error(f"❌ Lỗi: {str(e)}")
     
-    # Footer
+    # Footer - CHỈ HIỆN ZALO
     st.markdown("""
     <div class="footer">
-        <p><strong>TRƯỜNG TRUNG HỌC PHỔ THÔNG MINH ĐỨC</strong></p>
         <p>Zalo hỗ trợ kỹ thuật: <strong>038994070</strong></p>
     </div>
     """, unsafe_allow_html=True)
